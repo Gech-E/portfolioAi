@@ -26,8 +26,24 @@ const bottomNav = [
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
+import { useAuthStore } from '@/stores/auth-store';
+import { useRouter } from 'next/navigation';
+import { LogOut } from 'lucide-react';
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, logout } = useAuthStore();
+
+  const handleLogout = async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch {
+      // ignore errors during logout
+    }
+    logout();
+    router.push('/login');
+  };
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-950">
@@ -93,16 +109,24 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         {/* User chip */}
-        <div className="border-t border-gray-100 p-4 dark:border-gray-800">
-          <button className="flex w-full items-center gap-2.5 rounded-lg bg-gray-50 p-2.5 transition-colors hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700">
-            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs font-medium text-white">
-              AJ
+        <div className="border-t border-gray-100 p-4 dark:border-gray-800 space-y-2">
+          <div className="flex items-center gap-2.5 rounded-lg bg-gray-50 p-2.5 dark:bg-gray-800">
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-blue-600 text-xs font-medium text-white uppercase">
+              {user?.firstName?.[0]}{user?.lastName?.[0]}
             </div>
-            <div className="flex-1 text-left">
-              <p className="text-[13px] font-medium text-gray-900 dark:text-white">Alex Johnson</p>
-              <p className="text-[11px] text-gray-400">Pro plan</p>
+            <div className="flex-1 text-left overflow-hidden">
+              <p className="text-[13px] font-medium text-gray-900 dark:text-white truncate">
+                {user?.firstName} {user?.lastName}
+              </p>
+              <p className="text-[11px] text-gray-400 truncate uppercase tracking-tighter font-bold">{user?.role} PLAN</p>
             </div>
-            <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
+          </div>
+          <button 
+            onClick={handleLogout}
+            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+          >
+            <LogOut className="h-4 w-4" />
+            Sign Out
           </button>
         </div>
       </aside>
