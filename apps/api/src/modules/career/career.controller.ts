@@ -4,11 +4,12 @@ import {
   Post,
   Body,
   UseGuards,
-  Request,
+  Req,
 } from '@nestjs/common';
 import { CareerService } from './career.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AiService } from '../ai/ai.service';
+import { Request } from 'express';
 
 @Controller('career')
 @UseGuards(JwtAuthGuard)
@@ -19,49 +20,53 @@ export class CareerController {
   ) {}
 
   @Get('roadmaps')
-  getRoadmaps(@Request() req) {
-    return this.careerService.getRoadmaps(req.user.id);
+  async getRoadmaps(@Req() req: Request) {
+    const user = (req as any).user;
+    const roadmaps = await this.careerService.getRoadmaps(user.sub);
+    return { success: true, data: roadmaps, timestamp: new Date().toISOString() };
   }
 
   @Post('roadmaps/generate')
   async generateRoadmap(
-    @Request() req,
+    @Req() req: Request,
     @Body() body: { currentRole: string; targetRole: string; timelineMonths?: number },
   ) {
-    const result = await this.aiService.generate(req.user.id, 'CAREER_ROADMAP', body);
+    const user = (req as any).user;
+    const result = await this.aiService.generate(user.sub, 'CAREER_ROADMAP', body);
     
     // Save to database
-    const roadmap = await this.careerService.createRoadmap(req.user.id, {
+    const roadmap = await this.careerService.createRoadmap(user.sub, {
       ...body,
       milestones: result.result.milestones,
     });
 
-    return roadmap;
+    return { success: true, data: roadmap, timestamp: new Date().toISOString() };
   }
 
   @Get('assessments')
-  getAssessments(@Request() req) {
-    return this.careerService.getAssessments(req.user.id);
+  async getAssessments(@Req() req: Request) {
+    const user = (req as any).user;
+    const assessments = await this.careerService.getAssessments(user.sub);
+    return { success: true, data: assessments, timestamp: new Date().toISOString() };
   }
 
   @Post('assessments/generate')
   async generateAssessment(
-    @Request() req,
+    @Req() req: Request,
     @Body() body: { targetRole: string },
   ) {
-    // Get user context (skills from profile/integrations)
-    const user = await this.aiService.getCredits(req.user.id); // Placeholder for user context
+    const user = (req as any).user;
     
-    const result = await this.aiService.generate(req.user.id, 'SKILL_ANALYSIS', {
+    const result = await this.aiService.generate(user.sub, 'SKILL_ANALYSIS', {
       targetRole: body.targetRole,
-      // In a real app, we'd pass user's actual skills here
+      context: 'Based on user profile data', // In a real app, fetch actual profile data
     });
 
-    const assessment = await this.careerService.createAssessment(req.user.id, {
+    const assessment = await this.careerService.createAssessment(user.sub, {
       ...result.result,
       targetRole: body.targetRole,
     });
 
-    return assessment;
+    return { success: true, data: assessment, timestamp: new Date().toISOString() };
   }
 }

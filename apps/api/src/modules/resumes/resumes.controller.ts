@@ -7,13 +7,14 @@ import {
   Param,
   Delete,
   UseGuards,
-  Request,
+  Req,
 } from '@nestjs/common';
 import { ResumesService } from './resumes.service';
 import { CreateResumeDto } from './dto/create-resume.dto';
 import { UpdateResumeDto } from './dto/update-resume.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AiService } from '../ai/ai.service';
+import { Request } from 'express';
 
 @Controller('resumes')
 @UseGuards(JwtAuthGuard)
@@ -24,47 +25,58 @@ export class ResumesController {
   ) {}
 
   @Post()
-  create(@Request() req, @Body() createResumeDto: CreateResumeDto) {
-    return this.resumesService.create(req.user.id, createResumeDto);
+  async create(@Req() req: Request, @Body() createResumeDto: CreateResumeDto) {
+    const user = (req as any).user;
+    const resume = await this.resumesService.create(user.sub, createResumeDto);
+    return { success: true, data: resume, timestamp: new Date().toISOString() };
   }
 
   @Get()
-  findAll(@Request() req) {
-    return this.resumesService.findAllForUser(req.user.id);
+  async findAll(@Req() req: Request) {
+    const user = (req as any).user;
+    const resumes = await this.resumesService.findAllForUser(user.sub);
+    return { success: true, data: resumes, timestamp: new Date().toISOString() };
   }
 
   @Get(':id')
-  findOne(@Request() req, @Param('id') id: string) {
-    return this.resumesService.findOne(id, req.user.id);
+  async findOne(@Req() req: Request, @Param('id') id: string) {
+    const user = (req as any).user;
+    const resume = await this.resumesService.findOne(id, user.sub);
+    return { success: true, data: resume, timestamp: new Date().toISOString() };
   }
 
   @Patch(':id')
-  update(
-    @Request() req,
+  async update(
+    @Req() req: Request,
     @Param('id') id: string,
     @Body() updateResumeDto: UpdateResumeDto,
   ) {
-    return this.resumesService.update(id, req.user.id, updateResumeDto);
+    const user = (req as any).user;
+    const updated = await this.resumesService.update(id, user.sub, updateResumeDto);
+    return { success: true, data: updated, timestamp: new Date().toISOString() };
   }
 
   @Delete(':id')
-  remove(@Request() req, @Param('id') id: string) {
-    return this.resumesService.remove(id, req.user.id);
+  async remove(@Req() req: Request, @Param('id') id: string) {
+    const user = (req as any).user;
+    await this.resumesService.remove(id, user.sub);
+    return { success: true, data: null, timestamp: new Date().toISOString() };
   }
 
   @Post(':id/optimize')
   async optimize(
-    @Request() req,
+    @Req() req: Request,
     @Param('id') id: string,
     @Body() body: { jobDescription: string },
   ) {
-    const resume = await this.resumesService.findOne(id, req.user.id);
+    const user = (req as any).user;
+    const resume = await this.resumesService.findOne(id, user.sub);
     
-    const result = await this.aiService.generate(req.user.id, 'RESUME_OPTIMIZE', {
+    const result = await this.aiService.generate(user.sub, 'RESUME_OPTIMIZE', {
       resume: resume.sections,
       jobDescription: body.jobDescription,
     });
 
-    return result;
+    return { success: true, data: result, timestamp: new Date().toISOString() };
   }
 }
