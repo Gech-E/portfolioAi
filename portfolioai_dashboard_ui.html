@@ -1,0 +1,340 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.app{display:flex;min-height:700px;background:var(--color-background-tertiary)}
+.sidebar{width:220px;flex-shrink:0;background:var(--color-background-primary);border-right:0.5px solid var(--color-border-tertiary);display:flex;flex-direction:column;padding:20px 0}
+.logo{padding:0 20px 24px;display:flex;align-items:center;gap:10px}
+.logo-mark{width:32px;height:32px;border-radius:8px;background:#2563EB;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px}
+.logo-name{font-size:15px;font-weight:500;color:var(--color-text-primary)}
+.logo-name span{color:#2563EB}
+.nav-label{font-size:11px;font-weight:500;color:var(--color-text-tertiary);letter-spacing:.06em;text-transform:uppercase;padding:0 20px 8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;font-size:13.5px;color:var(--color-text-secondary);cursor:pointer;transition:background .15s;border-left:2.5px solid transparent}
+.nav-item:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+.nav-item.active{background:var(--color-background-secondary);color:#2563EB;border-left-color:#2563EB;font-weight:500}
+.nav-item i{font-size:17px}
+.nav-sep{height:1px;background:var(--color-border-tertiary);margin:12px 20px}
+.sidebar-footer{margin-top:auto;padding:16px 20px}
+.user-chip{display:flex;align-items:center;gap:10px;padding:10px;border-radius:var(--border-radius-md);background:var(--color-background-secondary);cursor:pointer}
+.avatar{width:32px;height:32px;border-radius:50%;background:#2563EB;color:#fff;font-size:12px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.user-info p{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.user-info span{font-size:11px;color:var(--color-text-tertiary)}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:56px;background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;padding:0 28px;gap:16px}
+.topbar-title{font-size:15px;font-weight:500;color:var(--color-text-primary);flex:1}
+.search-box{display:flex;align-items:center;gap:8px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:7px 12px;width:220px}
+.search-box input{border:none;background:transparent;font-size:13px;color:var(--color-text-primary);outline:none;width:100%}
+.search-box i{color:var(--color-text-tertiary);font-size:15px}
+.btn-primary{display:flex;align-items:center;gap:6px;background:#2563EB;color:#fff;border:none;border-radius:var(--border-radius-md);padding:8px 14px;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
+.btn-primary i{font-size:15px}
+.content{flex:1;padding:28px;overflow:auto}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.section-head h2{font-size:17px;font-weight:500;color:var(--color-text-primary)}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+.stat-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:16px 18px}
+.stat-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.stat-label i{font-size:14px}
+.stat-value{font-size:24px;font-weight:500;color:var(--color-text-primary);line-height:1}
+.stat-change{font-size:12px;margin-top:6px}
+.up{color:#16a34a}.down{color:#dc2626}
+.two-col{display:grid;grid-template-columns:1fr 380px;gap:20px;margin-bottom:28px}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:20px}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-head h3{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+.portfolio-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.portfolio-item:last-child{border-bottom:none;padding-bottom:0}
+.port-thumb{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.port-info{flex:1;min-width:0}
+.port-info p{font-size:13px;font-weight:500;color:var(--color-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.port-info span{font-size:12px;color:var(--color-text-tertiary)}
+.badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.badge-live{background:#dcfce7;color:#15803d}
+.badge-draft{background:var(--color-background-secondary);color:var(--color-text-secondary)}
+.badge-ai{background:#ede9fe;color:#6d28d9}
+.port-views{font-size:12px;color:var(--color-text-tertiary);text-align:right;white-space:nowrap}
+.ai-actions{display:flex;flex-direction:column;gap:10px}
+.ai-btn{display:flex;align-items:center;gap:12px;padding:13px 14px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);cursor:pointer;background:var(--color-background-primary);transition:background .15s}
+.ai-btn:hover{background:var(--color-background-secondary)}
+.ai-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.ai-btn-info{flex:1;text-align:left}
+.ai-btn-info p{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.ai-btn-info span{font-size:12px;color:var(--color-text-tertiary)}
+.ai-btn i.ti-arrow-right{color:var(--color-text-tertiary);font-size:15px}
+.activity-list{display:flex;flex-direction:column;gap:0}
+.act-item{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.act-item:last-child{border-bottom:none}
+.act-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:1px}
+.act-text p{font-size:13px;color:var(--color-text-primary)}
+.act-text span{font-size:12px;color:var(--color-text-tertiary)}
+.progress-bar{height:4px;background:var(--color-background-secondary);border-radius:4px;overflow:hidden;margin-top:6px}
+.progress-fill{height:100%;background:#2563EB;border-radius:4px}
+.skills-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.skill-row{display:flex;flex-direction:column;gap:4px}
+.skill-row p{font-size:12px;color:var(--color-text-secondary);display:flex;justify-content:space-between}
+.skill-row p span{font-weight:500;color:var(--color-text-primary)}
+.tab-row{display:flex;gap:2px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:3px;margin-bottom:16px}
+.tab{padding:6px 14px;font-size:13px;color:var(--color-text-secondary);border-radius:6px;cursor:pointer}
+.tab.active{background:var(--color-background-primary);color:var(--color-text-primary);font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.ats-score{display:flex;flex-direction:column;align-items:center;margin:16px 0}
+.score-ring{position:relative;width:88px;height:88px}
+.score-ring svg{width:88px;height:88px}
+.score-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.score-num p{font-size:22px;font-weight:500;color:var(--color-text-primary);line-height:1}
+.score-num span{font-size:10px;color:var(--color-text-tertiary)}
+.chip-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:500;border:0.5px solid var(--color-border-tertiary);color:var(--color-text-secondary)}
+.chip.good{background:#dcfce7;color:#15803d;border-color:transparent}
+.chip.warn{background:#fef9c3;color:#a16207;border-color:transparent}
+.chip.miss{background:#fee2e2;color:#b91c1c;border-color:transparent}
+</style>
+
+<h2 class="sr-only">PortfolioAI dashboard showing portfolio management, AI tools, and resume analysis</h2>
+
+<div class="app">
+  <div class="sidebar">
+    <div class="logo">
+      <div class="logo-mark"><i class="ti ti-briefcase" aria-hidden="true"></i></div>
+      <div class="logo-name">Portfolio<span>AI</span></div>
+    </div>
+
+    <div class="nav-label">Workspace</div>
+    <div class="nav-item active"><i class="ti ti-layout-dashboard" aria-hidden="true"></i> Dashboard</div>
+    <div class="nav-item"><i class="ti ti-world" aria-hidden="true"></i> My Portfolio</div>
+    <div class="nav-item"><i class="ti ti-file-cv" aria-hidden="true"></i> Resume Builder</div>
+    <div class="nav-item"><i class="ti ti-sparkles" aria-hidden="true"></i> AI Tools</div>
+
+    <div class="nav-sep"></div>
+    <div class="nav-label">Growth</div>
+    <div class="nav-item"><i class="ti ti-chart-bar" aria-hidden="true"></i> Analytics</div>
+    <div class="nav-item"><i class="ti ti-route" aria-hidden="true"></i> Career Roadmap</div>
+    <div class="nav-item"><i class="ti ti-plug-connected" aria-hidden="true"></i> Integrations</div>
+
+    <div class="nav-sep"></div>
+    <div class="nav-item"><i class="ti ti-settings" aria-hidden="true"></i> Settings</div>
+
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="avatar">AJ</div>
+        <div class="user-info">
+          <p>Alex Johnson</p>
+          <span>Pro plan</span>
+        </div>
+        <i class="ti ti-chevron-down" style="font-size:14px;color:var(--color-text-tertiary)" aria-hidden="true"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <span class="topbar-title">Dashboard</span>
+      <div class="search-box">
+        <i class="ti ti-search" aria-hidden="true"></i>
+        <input type="text" placeholder="Search portfolios, skills…" aria-label="Search"/>
+      </div>
+      <button class="btn-primary" onclick="sendPrompt('Generate a new portfolio for me')">
+        <i class="ti ti-plus" aria-hidden="true"></i> New portfolio
+      </button>
+    </div>
+
+    <div class="content">
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label"><i class="ti ti-eye" aria-hidden="true"></i> Portfolio views</div>
+          <div class="stat-value">3,842</div>
+          <div class="stat-change up"><i class="ti ti-trending-up" style="font-size:12px" aria-hidden="true"></i> +18% this month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label"><i class="ti ti-download" aria-hidden="true"></i> Resume downloads</div>
+          <div class="stat-value">124</div>
+          <div class="stat-change up"><i class="ti ti-trending-up" style="font-size:12px" aria-hidden="true"></i> +7 this week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label"><i class="ti ti-sparkles" aria-hidden="true"></i> AI credits left</div>
+          <div class="stat-value">38</div>
+          <div class="stat-change" style="color:var(--color-text-tertiary)">of 50/month used</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label"><i class="ti ti-user-check" aria-hidden="true"></i> Employability score</div>
+          <div class="stat-value">74</div>
+          <div class="stat-change up">+6 pts since last month</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div style="display:flex;flex-direction:column;gap:20px">
+
+          <div class="card">
+            <div class="card-head">
+              <h3>My portfolios</h3>
+              <div class="tab-row" style="margin-bottom:0">
+                <div class="tab active">All</div>
+                <div class="tab">Live</div>
+                <div class="tab">Drafts</div>
+              </div>
+            </div>
+
+            <div class="portfolio-item">
+              <div class="port-thumb" style="background:#ede9fe"><i class="ti ti-code" style="color:#6d28d9" aria-hidden="true"></i></div>
+              <div class="port-info">
+                <p>Full-Stack Developer Portfolio</p>
+                <span>alexjohnson.portfolioai.com</span>
+              </div>
+              <span class="badge badge-live">Live</span>
+              <div class="port-views"><i class="ti ti-eye" style="font-size:12px" aria-hidden="true"></i> 2,104</div>
+            </div>
+
+            <div class="portfolio-item">
+              <div class="port-thumb" style="background:#e0f2fe"><i class="ti ti-palette" style="color:#0369a1" aria-hidden="true"></i></div>
+              <div class="port-info">
+                <p>UX & Design Showcase</p>
+                <span>alex-design.portfolioai.com</span>
+              </div>
+              <span class="badge badge-draft">Draft</span>
+              <div class="port-views"><i class="ti ti-eye" style="font-size:12px" aria-hidden="true"></i> —</div>
+            </div>
+
+            <div class="portfolio-item">
+              <div class="port-thumb" style="background:#dcfce7"><i class="ti ti-robot" style="color:#15803d" aria-hidden="true"></i></div>
+              <div class="port-info">
+                <p>AI & ML Projects</p>
+                <span>alex-ml.portfolioai.com</span>
+              </div>
+              <span class="badge badge-live">Live</span>
+              <div class="port-views"><i class="ti ti-eye" style="font-size:12px" aria-hidden="true"></i> 1,738</div>
+            </div>
+
+            <div class="portfolio-item">
+              <div class="port-thumb" style="background:#fef3c7"><i class="ti ti-writing" style="color:#92400e" aria-hidden="true"></i></div>
+              <div class="port-info">
+                <p>Technical Writing Portfolio</p>
+                <span>Not published yet</span>
+              </div>
+              <span class="badge badge-ai">AI generating…</span>
+              <div class="port-views">—</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>Skill profile</h3><span style="font-size:12px;color:var(--color-text-tertiary)">Based on GitHub + LinkedIn</span></div>
+            <div class="skills-grid">
+              <div class="skill-row">
+                <p>React / Next.js <span>92%</span></p>
+                <div class="progress-bar"><div class="progress-fill" style="width:92%"></div></div>
+              </div>
+              <div class="skill-row">
+                <p>Python <span>78%</span></p>
+                <div class="progress-bar"><div class="progress-fill" style="width:78%"></div></div>
+              </div>
+              <div class="skill-row">
+                <p>Node.js <span>85%</span></p>
+                <div class="progress-bar"><div class="progress-fill" style="width:85%"></div></div>
+              </div>
+              <div class="skill-row">
+                <p>TypeScript <span>80%</span></p>
+                <div class="progress-bar"><div class="progress-fill" style="width:80%"></div></div>
+              </div>
+              <div class="skill-row">
+                <p>PostgreSQL <span>65%</span></p>
+                <div class="progress-bar"><div class="progress-fill" style="width:65%;background:#f59e0b"></div></div>
+              </div>
+              <div class="skill-row">
+                <p>Docker / K8s <span>55%</span></p>
+                <div class="progress-bar"><div class="progress-fill" style="width:55%;background:#f59e0b"></div></div>
+              </div>
+            </div>
+            <button style="margin-top:14px;width:100%;padding:9px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:transparent;font-size:13px;color:var(--color-text-secondary);cursor:pointer" onclick="sendPrompt('Run a full skill gap analysis and career roadmap for me')">
+              Run AI skill gap analysis ↗
+            </button>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:20px">
+
+          <div class="card">
+            <div class="card-head"><h3>AI tools</h3></div>
+            <div class="ai-actions">
+              <div class="ai-btn" onclick="sendPrompt('Generate a professional bio for me')">
+                <div class="ai-icon" style="background:#ede9fe"><i class="ti ti-user-circle" style="color:#6d28d9" aria-hidden="true"></i></div>
+                <div class="ai-btn-info"><p>Generate bio</p><span>Rewrite your About section</span></div>
+                <i class="ti ti-arrow-right" aria-hidden="true"></i>
+              </div>
+              <div class="ai-btn" onclick="sendPrompt('Optimize my resume for a Senior Software Engineer role')">
+                <div class="ai-icon" style="background:#e0f2fe"><i class="ti ti-file-description" style="color:#0369a1" aria-hidden="true"></i></div>
+                <div class="ai-btn-info"><p>Optimize resume</p><span>Target a specific job role</span></div>
+                <i class="ti ti-arrow-right" aria-hidden="true"></i>
+              </div>
+              <div class="ai-btn" onclick="sendPrompt('Write a case study for my most recent GitHub project')">
+                <div class="ai-icon" style="background:#dcfce7"><i class="ti ti-report" style="color:#15803d" aria-hidden="true"></i></div>
+                <div class="ai-btn-info"><p>Write case study</p><span>From your GitHub projects</span></div>
+                <i class="ti ti-arrow-right" aria-hidden="true"></i>
+              </div>
+              <div class="ai-btn" onclick="sendPrompt('Generate GitHub README files for my top 3 repositories')">
+                <div class="ai-icon" style="background:#fef3c7"><i class="ti ti-brand-github" style="color:#92400e" aria-hidden="true"></i></div>
+                <div class="ai-btn-info"><p>Generate README</p><span>Auto-document your repos</span></div>
+                <i class="ti ti-arrow-right" aria-hidden="true"></i>
+              </div>
+              <div class="ai-btn" onclick="sendPrompt('Improve my LinkedIn summary')">
+                <div class="ai-icon" style="background:#fee2e2"><i class="ti ti-brand-linkedin" style="color:#b91c1c" aria-hidden="true"></i></div>
+                <div class="ai-btn-info"><p>Improve LinkedIn</p><span>Recruiter-optimized summary</span></div>
+                <i class="ti ti-arrow-right" aria-hidden="true"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>Resume ATS score</h3></div>
+            <div class="tab-row">
+              <div class="tab active">SE — Senior Role</div>
+              <div class="tab">PM Role</div>
+            </div>
+            <div class="ats-score">
+              <div class="score-ring">
+                <svg viewBox="0 0 88 88" fill="none" aria-hidden="true">
+                  <circle cx="44" cy="44" r="36" stroke="var(--color-border-tertiary)" stroke-width="8"/>
+                  <circle cx="44" cy="44" r="36" stroke="#2563EB" stroke-width="8" stroke-dasharray="226" stroke-dashoffset="59" stroke-linecap="round" transform="rotate(-90 44 44)"/>
+                </svg>
+                <div class="score-num"><p>74</p><span>/ 100</span></div>
+              </div>
+              <p style="font-size:13px;color:var(--color-text-secondary);margin-top:10px;text-align:center">Good — minor improvements will push you to 85+</p>
+            </div>
+            <div class="chip-row">
+              <span class="chip good"><i class="ti ti-check" style="font-size:10px" aria-hidden="true"></i> Keywords matched</span>
+              <span class="chip good"><i class="ti ti-check" style="font-size:10px" aria-hidden="true"></i> Formatting</span>
+              <span class="chip warn">Weak action verbs</span>
+              <span class="chip miss">Missing: AWS cert</span>
+              <span class="chip miss">Missing: system design</span>
+            </div>
+            <button style="margin-top:14px;width:100%;padding:9px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:transparent;font-size:13px;color:var(--color-text-secondary);cursor:pointer" onclick="sendPrompt('Fix my resume ATS issues and push my score above 85')">
+              Auto-fix with AI ↗
+            </button>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>Recent activity</h3></div>
+            <div class="activity-list">
+              <div class="act-item">
+                <div class="act-dot" style="background:#ede9fe"><i class="ti ti-sparkles" style="color:#6d28d9;font-size:13px" aria-hidden="true"></i></div>
+                <div class="act-text"><p>AI generated your ML portfolio bio</p><span>2 hours ago</span></div>
+              </div>
+              <div class="act-item">
+                <div class="act-dot" style="background:#dcfce7"><i class="ti ti-world" style="color:#15803d;font-size:13px" aria-hidden="true"></i></div>
+                <div class="act-text"><p>Full-Stack portfolio published</p><span>Yesterday</span></div>
+              </div>
+              <div class="act-item">
+                <div class="act-dot" style="background:#e0f2fe"><i class="ti ti-brand-github" style="color:#0369a1;font-size:13px" aria-hidden="true"></i></div>
+                <div class="act-text"><p>12 GitHub repos imported</p><span>2 days ago</span></div>
+              </div>
+              <div class="act-item">
+                <div class="act-dot" style="background:#fef3c7"><i class="ti ti-file-cv" style="color:#92400e;font-size:13px" aria-hidden="true"></i></div>
+                <div class="act-text"><p>Resume optimized for SE role</p><span>3 days ago</span></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

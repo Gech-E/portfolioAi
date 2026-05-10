@@ -1,0 +1,622 @@
+// =============================================================
+// PortfolioAI — Prisma Schema
+// Database: PostgreSQL (Neon)
+// =============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// =============================================================
+// AUTHENTICATION & USERS
+// =============================================================
+
+enum UserRole {
+  FREE
+  PRO
+  PRO_PLUS
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+model User {
+  id                  String       @id @default(cuid())
+  email               String       @unique
+  passwordHash        String?
+  firstName           String
+  lastName            String
+  headline            String?
+  bio                 String?      @db.Text
+  avatarUrl           String?
+  location            String?
+  website             String?
+  phone               String?
+  role                UserRole     @default(FREE)
+  status              UserStatus   @default(ACTIVE)
+  emailVerified       Boolean      @default(false)
+  emailVerifiedAt     DateTime?
+  mfaEnabled          Boolean      @default(false)
+  mfaSecret           String?
+  onboardingCompleted Boolean      @default(false)
+  socialLinks         Json?
+  lastLoginAt         DateTime?
+  loginAttempts       Int          @default(0)
+  lockedUntil         DateTime?
+
+  // Relations
+  accounts            Account[]
+  sessions            Session[]
+  portfolios          Portfolio[]
+  resumes             Resume[]
+  aiGenerations       AIGeneration[]
+  aiCredits           AICredits?
+  integrations        Integration[]
+  subscription        Subscription?
+  payments            Payment[]
+  notifications       Notification[]
+  auditLogs           AuditLog[]
+  skillAssessments    SkillAssessment[]
+  careerRoadmaps      CareerRoadmap[]
+  portfolioViews      PortfolioView[]
+  resumeDownloads     ResumeDownload[]
+
+  // Timestamps
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  deletedAt           DateTime?
+
+  @@index([email])
+  @@index([role])
+  @@index([status])
+  @@index([createdAt])
+  @@map("users")
+}
+
+model Account {
+  id                String   @id @default(cuid())
+  userId            String
+  provider          String   // google, github, linkedin
+  providerAccountId String
+  accessToken       String?  @db.Text
+  refreshToken      String?  @db.Text
+  expiresAt         Int?
+  tokenType         String?
+  scope             String?
+
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  token        String   @unique
+  refreshToken String   @unique
+  userAgent    String?
+  ipAddress    String?
+  expiresAt    DateTime
+  revokedAt    DateTime?
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model VerificationToken {
+  id         String   @id @default(cuid())
+  email      String
+  token      String   @unique
+  type       String   // email_verify, password_reset
+  expiresAt  DateTime
+  usedAt     DateTime?
+
+  createdAt  DateTime @default(now())
+
+  @@index([token])
+  @@index([email])
+  @@map("verification_tokens")
+}
+
+// =============================================================
+// PORTFOLIOS
+// =============================================================
+
+enum PortfolioStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model Portfolio {
+  id           String          @id @default(cuid())
+  userId       String
+  title        String
+  slug         String
+  description  String?         @db.Text
+  status       PortfolioStatus @default(DRAFT)
+  templateId   String?
+  theme        Json            @default("{}")
+  sections     Json            @default("[]")
+  seoMeta      Json?
+  customDomain String?         @unique
+  publishedUrl String?
+  viewCount    Int             @default(0)
+  version      Int             @default(1)
+
+  // Relations
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  template     PortfolioTemplate? @relation(fields: [templateId], references: [id])
+  versions     PortfolioVersion[]
+  views        PortfolioView[]
+
+  // Timestamps
+  publishedAt  DateTime?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  deletedAt    DateTime?
+
+  @@unique([userId, slug])
+  @@index([userId])
+  @@index([status])
+  @@index([slug])
+  @@map("portfolios")
+}
+
+model PortfolioVersion {
+  id          String    @id @default(cuid())
+  portfolioId String
+  version     Int
+  sections    Json
+  theme       Json
+  seoMeta     Json?
+  changelog   String?
+
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime  @default(now())
+
+  @@index([portfolioId])
+  @@map("portfolio_versions")
+}
+
+model PortfolioTemplate {
+  id           String      @id @default(cuid())
+  name         String
+  slug         String      @unique
+  description  String?     @db.Text
+  previewUrl   String?
+  thumbnailUrl String?
+  category     String
+  sections     Json        @default("[]")
+  theme        Json        @default("{}")
+  isPremium    Boolean     @default(false)
+  isActive     Boolean     @default(true)
+  usageCount   Int         @default(0)
+
+  portfolios   Portfolio[]
+
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([category])
+  @@index([isPremium])
+  @@map("portfolio_templates")
+}
+
+model PortfolioView {
+  id          String    @id @default(cuid())
+  portfolioId String
+  userId      String?
+  visitorId   String?
+  referrer    String?
+  userAgent   String?
+  country     String?
+  city        String?
+  device      String?
+
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  user        User?     @relation(fields: [userId], references: [id])
+
+  createdAt   DateTime  @default(now())
+
+  @@index([portfolioId])
+  @@index([createdAt])
+  @@map("portfolio_views")
+}
+
+// =============================================================
+// RESUMES
+// =============================================================
+
+enum ResumeStatus {
+  DRAFT
+  READY
+  OPTIMIZING
+}
+
+model Resume {
+  id            String       @id @default(cuid())
+  userId        String
+  title         String
+  status        ResumeStatus @default(DRAFT)
+  targetRole    String?
+  targetCompany String?
+  jobDescription String?     @db.Text
+  sections      Json         @default("[]")
+  atsScore      Json?
+  fileUrl       String?
+  version       Int          @default(1)
+  downloadCount Int          @default(0)
+
+  // Relations
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  versions      ResumeVersion[]
+  downloads     ResumeDownload[]
+
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+
+  @@index([userId])
+  @@index([status])
+  @@map("resumes")
+}
+
+model ResumeVersion {
+  id        String   @id @default(cuid())
+  resumeId  String
+  version   Int
+  sections  Json
+  atsScore  Json?
+  changelog String?
+
+  resume    Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([resumeId])
+  @@map("resume_versions")
+}
+
+model ResumeDownload {
+  id       String   @id @default(cuid())
+  resumeId String
+  userId   String?
+  format   String   // pdf, docx
+  source   String?
+
+  resume   Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  user     User?    @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([resumeId])
+  @@index([createdAt])
+  @@map("resume_downloads")
+}
+
+// =============================================================
+// AI SYSTEM
+// =============================================================
+
+enum AIGenerationType {
+  PORTFOLIO_BIO
+  PORTFOLIO_ABOUT
+  PORTFOLIO_FULL
+  RESUME_OPTIMIZE
+  RESUME_REWRITE
+  CASE_STUDY
+  README
+  SKILL_ANALYSIS
+  CAREER_ROADMAP
+  LINKEDIN_SUMMARY
+  PROJECT_DESCRIPTION
+}
+
+enum AIJobStatus {
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model AIGeneration {
+  id          String           @id @default(cuid())
+  userId      String
+  type        AIGenerationType
+  status      AIJobStatus      @default(QUEUED)
+  input       Json
+  output      Json?
+  model       String           @default("gpt-4o-mini")
+  tokensUsed  Int              @default(0)
+  creditsUsed Int              @default(0)
+  error       String?          @db.Text
+  retryCount  Int              @default(0)
+  priority    String           @default("normal")
+
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime         @default(now())
+
+  @@index([userId])
+  @@index([status])
+  @@index([type])
+  @@index([createdAt])
+  @@map("ai_generations")
+}
+
+model AICredits {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  total      Int      @default(10)
+  used       Int      @default(0)
+  resetsAt   DateTime
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  updatedAt  DateTime @updatedAt
+
+  @@map("ai_credits")
+}
+
+model PromptTemplate {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  type        String
+  version     Int      @default(1)
+  systemPrompt String  @db.Text
+  userPrompt  String   @db.Text
+  model       String   @default("gpt-4o-mini")
+  temperature Float    @default(0.7)
+  maxTokens   Int      @default(2000)
+  isActive    Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([type])
+  @@map("prompt_templates")
+}
+
+// =============================================================
+// SKILLS & CAREER
+// =============================================================
+
+model SkillAssessment {
+  id                String   @id @default(cuid())
+  userId            String
+  skills            Json     @default("[]")
+  employabilityScore Int     @default(0)
+  targetRole        String?
+  gaps              Json?
+  recommendations   Json?
+  sources           Json?
+
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([userId])
+  @@map("skill_assessments")
+}
+
+model CareerRoadmap {
+  id             String   @id @default(cuid())
+  userId         String
+  currentRole    String
+  targetRole     String
+  timelineMonths Int
+  milestones     Json     @default("[]")
+  status         String   @default("active")
+
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
+  @@map("career_roadmaps")
+}
+
+// =============================================================
+// INTEGRATIONS
+// =============================================================
+
+enum IntegrationProvider {
+  GITHUB
+  LINKEDIN
+  BEHANCE
+  DRIBBBLE
+  MEDIUM
+  GOOGLE_SCHOLAR
+  KAGGLE
+  STACK_OVERFLOW
+}
+
+enum IntegrationStatus {
+  CONNECTED
+  DISCONNECTED
+  ERROR
+  SYNCING
+}
+
+model Integration {
+  id               String              @id @default(cuid())
+  userId           String
+  provider         IntegrationProvider
+  status           IntegrationStatus   @default(DISCONNECTED)
+  externalUsername  String?
+  profileUrl       String?
+  accessToken      String?             @db.Text
+  refreshToken     String?             @db.Text
+  tokenExpiresAt   DateTime?
+  data             Json?
+  lastSyncAt       DateTime?
+
+  user             User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  @@unique([userId, provider])
+  @@index([userId])
+  @@map("integrations")
+}
+
+// =============================================================
+// BILLING & SUBSCRIPTIONS
+// =============================================================
+
+enum PlanTier {
+  FREE
+  PRO
+  PRO_PLUS
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  TRIALING
+}
+
+model Plan {
+  id                   String   @id @default(cuid())
+  name                 String
+  tier                 PlanTier @unique
+  description          String?  @db.Text
+  priceMonthly         Int      @default(0) // in cents
+  priceYearly          Int      @default(0)
+  currency             String   @default("USD")
+  aiCreditsPerMonth    Int      @default(10)
+  maxPortfolios        Int      @default(1)
+  maxResumes           Int      @default(2)
+  customDomain         Boolean  @default(false)
+  analyticsAccess      Boolean  @default(false)
+  prioritySupport      Boolean  @default(false)
+  features             Json     @default("[]")
+  stripePriceIdMonthly String?
+  stripePriceIdYearly  String?
+  isActive             Boolean  @default(true)
+
+  subscriptions        Subscription[]
+
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@map("plans")
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  userId               String             @unique
+  planId               String
+  status               SubscriptionStatus @default(ACTIVE)
+  stripeSubscriptionId String?            @unique
+  stripeCustomerId     String?
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean            @default(false)
+
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan                 Plan               @relation(fields: [planId], references: [id])
+
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@map("subscriptions")
+}
+
+model Payment {
+  id                String   @id @default(cuid())
+  userId            String
+  amount            Int      // in cents
+  currency          String   @default("USD")
+  status            String   // succeeded, pending, failed
+  provider          String   // stripe, chapa
+  providerPaymentId String?
+  description       String?
+  invoiceUrl        String?
+  metadata          Json?
+
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt         DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("payments")
+}
+
+// =============================================================
+// NOTIFICATIONS & AUDIT
+// =============================================================
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  message   String   @db.Text
+  read      Boolean  @default(false)
+  data      Json?
+  link      String?
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([read])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  entity    String
+  entityId  String?
+  oldData   Json?
+  newData   Json?
+  ipAddress String?
+  userAgent String?
+
+  user      User?    @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([entity])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
