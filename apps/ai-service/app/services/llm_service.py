@@ -3,47 +3,52 @@ LLM Service — handles all AI generation through OpenAI/LangChain
 """
 
 import uuid
-from typing import Optional
+from typing import Optional, List, Dict, Any
+from pydantic import BaseModel, Field
+from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import PydanticOutputParser
 from app.core.config import settings
+
+# Structured output models
+class BioOutput(BaseModel):
+    headline: str = Field(description="A catchy professional headline")
+    summary: str = Field(description="A short professional summary (1-2 sentences)")
+    detailed_bio: str = Field(description="A longer, multi-paragraph professional bio")
+
+class ExperienceOutput(BaseModel):
+    achievements: List[str] = Field(description="List of 3-5 high-impact bullet points")
+    keywords: List[str] = Field(description="Relevant keywords for ATS optimization")
 
 # Prompt templates mapping
 PROMPT_MAP = {
     "PORTFOLIO_BIO": {
-        "system": "You are a professional branding expert. Generate a compelling, concise professional bio. Write in first person.",
-        "user_template": "Write a professional bio for {name}, who is a {role}. Skills: {skills}.",
-        "model": "gpt-4o-mini",
-        "max_tokens": 500,
-        "temperature": 0.7,
+        "system": "You are a professional branding expert. Generate a compelling professional bio and headline. Write in first person.",
+        "user_template": "Write a professional bio for {name}, who is a {role}. Skills: {skills}. Background: {background}.",
+        "model": settings.openai_model_fast,
+        "output_model": BioOutput,
     },
-    "RESUME_OPTIMIZE": {
-        "system": "You are an expert resume writer and ATS optimization specialist.",
-        "user_template": "Optimize this resume for: {target_role}. Job description: {job_description}. Resume: {resume_content}.",
-        "model": "gpt-4o",
-        "max_tokens": 3000,
-        "temperature": 0.4,
-    },
-    "CASE_STUDY": {
-        "system": "You are a technical writer who creates compelling project case studies.",
-        "user_template": "Write a case study for project: {project_name}. Tech: {technologies}. Description: {description}.",
-        "model": "gpt-4o",
-        "max_tokens": 2000,
-        "temperature": 0.7,
-    },
-    "SKILL_ANALYSIS": {
-        "system": "You are a career intelligence AI. Analyze skills and provide actionable career guidance.",
-        "user_template": "Analyze skills: {skills}. Current role: {current_role}. Target: {target_role}.",
-        "model": "gpt-4o",
-        "max_tokens": 3000,
-        "temperature": 0.3,
+    "EXPERIENCE_OPTIMIZE": {
+        "system": "You are an expert resume writer. Generate high-impact bullet points and keywords for this experience.",
+        "user_template": "Company: {company}. Role: {role}. Description: {description}. Tech: {technologies}.",
+        "model": settings.openai_model_primary,
+        "output_model": ExperienceOutput,
     },
 }
 
 
 class LLMService:
-    """Service for AI generation using OpenAI API"""
+    """Service for AI generation using LangChain and OpenAI"""
 
     def __init__(self):
         self.api_key = settings.openai_api_key
+
+    def _get_llm(self, model: str, temperature: float = 0.7):
+        return ChatOpenAI(
+            api_key=self.api_key,
+            model=model,
+            temperature=temperature,
+        )
 
     async def generate(
         self,
@@ -51,56 +56,56 @@ class LLMService:
         input_data: dict,
         model: Optional[str] = None,
     ) -> dict:
-        """Generate content using AI"""
+        """Generate content using AI with LangChain"""
         prompt_config = PROMPT_MAP.get(generation_type)
+        
+        # Fallback for simple generation if type not in PROMPT_MAP
         if not prompt_config:
-            raise ValueError(f"Unknown generation type: {generation_type}")
+            return await self._simple_generate(generation_type, input_data, model)
 
         used_model = model or prompt_config["model"]
         job_id = str(uuid.uuid4())
 
         # If no API key, return mock response
         if not self.api_key:
-            return {
-                "job_id": job_id,
-                "status": "completed",
-                "result": {
-                    "content": f"[Mock AI Response] Generated {generation_type} content. Configure OPENAI_API_KEY for real generation.",
-                    "type": generation_type,
-                    "mock": True,
-                },
-                "tokens_used": 0,
-                "model": used_model,
-            }
+            return self._mock_response(job_id, generation_type, used_model)
 
         try:
-            from openai import AsyncOpenAI
-
-            client = AsyncOpenAI(api_key=self.api_key)
-
-            # Build user prompt from template
-            user_prompt = prompt_config["user_template"]
-            for key, value in input_data.items():
-                user_prompt = user_prompt.replace(f"{{{key}}}", str(value))
-
-            response = await client.chat.completions.create(
-                model=used_model,
-                messages=[
-                    {"role": "system", "content": prompt_config["system"]},
-                    {"role": "user", "content": user_prompt},
-                ],
-                max_tokens=prompt_config["max_tokens"],
-                temperature=prompt_config["temperature"],
-            )
-
-            content = response.choices[0].message.content
-            tokens = response.usage.total_tokens if response.usage else 0
-
+            llm = self._get_llm(used_model)
+            
+            # Use structured output if model is provided
+            output_model = prompt_config.get("output_model")
+            if output_model:
+                structured_llm = llm.with_structured_output(output_model)
+                
+                prompt = ChatPromptTemplate.from_messages([
+                    ("system", prompt_config["system"]),
+                    ("user", prompt_config["user_template"]),
+                ])
+                
+                chain = prompt | structured_llm
+                result = await chain.ainvoke(input_data)
+                
+                return {
+                    "job_id": job_id,
+                    "status": "completed",
+                    "result": result.model_dump(),
+                    "model": used_model,
+                }
+            
+            # Standard generation
+            prompt = ChatPromptTemplate.from_messages([
+                ("system", prompt_config["system"]),
+                ("user", prompt_config["user_template"]),
+            ])
+            
+            chain = prompt | llm
+            response = await chain.ainvoke(input_data)
+            
             return {
                 "job_id": job_id,
                 "status": "completed",
-                "result": {"content": content, "type": generation_type},
-                "tokens_used": tokens,
+                "result": {"content": response.content},
                 "model": used_model,
             }
 
@@ -109,6 +114,37 @@ class LLMService:
                 "job_id": job_id,
                 "status": "failed",
                 "result": {"error": str(e)},
-                "tokens_used": 0,
                 "model": used_model,
             }
+
+    async def _simple_generate(self, type: str, data: dict, model: Optional[str]):
+        """Fallback for types not in PROMPT_MAP"""
+        job_id = str(uuid.uuid4())
+        used_model = model or settings.openai_model_fast
+        
+        if not self.api_key:
+            return self._mock_response(job_id, type, used_model)
+            
+        try:
+            llm = self._get_llm(used_model)
+            response = await llm.ainvoke(str(data))
+            return {
+                "job_id": job_id,
+                "status": "completed",
+                "result": {"content": response.content},
+                "model": used_model,
+            }
+        except Exception as e:
+            return {"job_id": job_id, "status": "failed", "result": {"error": str(e)}}
+
+    def _mock_response(self, job_id: str, type: str, model: str):
+        return {
+            "job_id": job_id,
+            "status": "completed",
+            "result": {
+                "content": f"[Mock] Generated {type} content.",
+                "mock": True,
+            },
+            "model": model,
+        }
+

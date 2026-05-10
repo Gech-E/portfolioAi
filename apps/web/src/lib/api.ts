@@ -1,6 +1,6 @@
 import type { ApiResponse, ApiErrorResponse } from '@portfolioai/types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4005';
 
 class ApiClient {
   private baseUrl: string;

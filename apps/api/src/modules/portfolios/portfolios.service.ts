@@ -56,13 +56,40 @@ export class PortfoliosService {
       throw new NotFoundException('Portfolio not found');
     }
 
+    const { template, ...data } = dto as any;
+
     return this.prisma.portfolio.update({
       where: { id },
       data: {
-        ...dto,
-        template: undefined, // remove template from dto
+        ...data,
+        templateId: template || data.templateId,
       },
     });
+  }
+
+  async findBySlug(slug: string) {
+    const portfolio = await this.prisma.portfolio.findFirst({
+      where: { 
+        slug,
+        status: 'PUBLISHED', // Only public if published
+      },
+      include: {
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            avatarUrl: true,
+            headline: true,
+          },
+        },
+      },
+    });
+
+    if (!portfolio) {
+      throw new NotFoundException('Portfolio not found');
+    }
+
+    return portfolio;
   }
 
   async remove(id: string, userId: string) {
