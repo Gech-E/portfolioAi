@@ -1,7 +1,5 @@
-// =============================================================
 // PortfolioAI — Prisma Schema
 // Database: PostgreSQL (Neon)
-// =============================================================
 
 generator client {
   provider = "prisma-client-js"
@@ -13,9 +11,7 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// =============================================================
 // AUTHENTICATION & USERS
-// =============================================================
 
 enum UserRole {
   FREE
@@ -31,50 +27,50 @@ enum UserStatus {
 }
 
 model User {
-  id                  String       @id @default(cuid())
-  email               String       @unique
+  id                  String     @id @default(cuid())
+  email               String     @unique
   passwordHash        String?
   firstName           String
   lastName            String
   headline            String?
-  bio                 String?      @db.Text
+  bio                 String?    @db.Text
   avatarUrl           String?
   location            String?
   website             String?
   phone               String?
-  role                UserRole     @default(FREE)
-  status              UserStatus   @default(ACTIVE)
-  emailVerified       Boolean      @default(false)
+  role                UserRole   @default(FREE)
+  status              UserStatus @default(ACTIVE)
+  emailVerified       Boolean    @default(false)
   emailVerifiedAt     DateTime?
-  mfaEnabled          Boolean      @default(false)
+  mfaEnabled          Boolean    @default(false)
   mfaSecret           String?
-  onboardingCompleted Boolean      @default(false)
+  onboardingCompleted Boolean    @default(false)
   socialLinks         Json?
   lastLoginAt         DateTime?
-  loginAttempts       Int          @default(0)
+  loginAttempts       Int        @default(0)
   lockedUntil         DateTime?
 
   // Relations
-  accounts            Account[]
-  sessions            Session[]
-  portfolios          Portfolio[]
-  resumes             Resume[]
-  aiGenerations       AIGeneration[]
-  aiCredits           AICredits?
-  integrations        Integration[]
-  subscription        Subscription?
-  payments            Payment[]
-  notifications       Notification[]
-  auditLogs           AuditLog[]
-  skillAssessments    SkillAssessment[]
-  careerRoadmaps      CareerRoadmap[]
-  portfolioViews      PortfolioView[]
-  resumeDownloads     ResumeDownload[]
+  accounts         Account[]
+  sessions         Session[]
+  portfolios       Portfolio[]
+  resumes          Resume[]
+  aiGenerations    AIGeneration[]
+  aiCredits        AICredits?
+  integrations     Integration[]
+  subscription     Subscription?
+  payments         Payment[]
+  notifications    Notification[]
+  auditLogs        AuditLog[]
+  skillAssessments SkillAssessment[]
+  careerRoadmaps   CareerRoadmap[]
+  portfolioViews   PortfolioView[]
+  resumeDownloads  ResumeDownload[]
 
   // Timestamps
-  createdAt           DateTime     @default(now())
-  updatedAt           DateTime     @updatedAt
-  deletedAt           DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   @@index([email])
   @@index([role])
@@ -84,20 +80,20 @@ model User {
 }
 
 model Account {
-  id                String   @id @default(cuid())
+  id                String  @id @default(cuid())
   userId            String
-  provider          String   // google, github, linkedin
+  provider          String // google, github, linkedin
   providerAccountId String
-  accessToken       String?  @db.Text
-  refreshToken      String?  @db.Text
+  accessToken       String? @db.Text
+  refreshToken      String? @db.Text
   expiresAt         Int?
   tokenType         String?
   scope             String?
 
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([provider, providerAccountId])
   @@index([userId])
@@ -105,18 +101,18 @@ model Account {
 }
 
 model Session {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   userId       String
-  token        String   @unique
-  refreshToken String   @unique
+  token        String    @unique
+  refreshToken String    @unique
   userAgent    String?
   ipAddress    String?
   expiresAt    DateTime
   revokedAt    DateTime?
 
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt    DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([userId])
   @@index([token])
@@ -125,23 +121,21 @@ model Session {
 }
 
 model VerificationToken {
-  id         String   @id @default(cuid())
-  email      String
-  token      String   @unique
-  type       String   // email_verify, password_reset
-  expiresAt  DateTime
-  usedAt     DateTime?
+  id        String    @id @default(cuid())
+  email     String
+  token     String    @unique
+  type      String // email_verify, password_reset
+  expiresAt DateTime
+  usedAt    DateTime?
 
-  createdAt  DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([token])
   @@index([email])
   @@map("verification_tokens")
 }
 
-// =============================================================
 // PORTFOLIOS
-// =============================================================
 
 enum PortfolioStatus {
   DRAFT
@@ -166,16 +160,16 @@ model Portfolio {
   version      Int             @default(1)
 
   // Relations
-  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  template     PortfolioTemplate? @relation(fields: [templateId], references: [id])
-  versions     PortfolioVersion[]
-  views        PortfolioView[]
+  user     User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  template PortfolioTemplate? @relation(fields: [templateId], references: [id])
+  versions PortfolioVersion[]
+  views    PortfolioView[]
 
   // Timestamps
-  publishedAt  DateTime?
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
-  deletedAt    DateTime?
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
 
   @@unique([userId, slug])
   @@index([userId])
@@ -185,7 +179,7 @@ model Portfolio {
 }
 
 model PortfolioVersion {
-  id          String    @id @default(cuid())
+  id          String  @id @default(cuid())
   portfolioId String
   version     Int
   sections    Json
@@ -193,32 +187,32 @@ model PortfolioVersion {
   seoMeta     Json?
   changelog   String?
 
-  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
 
-  createdAt   DateTime  @default(now())
+  createdAt DateTime @default(now())
 
   @@index([portfolioId])
   @@map("portfolio_versions")
 }
 
 model PortfolioTemplate {
-  id           String      @id @default(cuid())
+  id           String  @id @default(cuid())
   name         String
-  slug         String      @unique
-  description  String?     @db.Text
+  slug         String  @unique
+  description  String? @db.Text
   previewUrl   String?
   thumbnailUrl String?
   category     String
-  sections     Json        @default("[]")
-  theme        Json        @default("{}")
-  isPremium    Boolean     @default(false)
-  isActive     Boolean     @default(true)
-  usageCount   Int         @default(0)
+  sections     Json    @default("[]")
+  theme        Json    @default("{}")
+  isPremium    Boolean @default(false)
+  isActive     Boolean @default(true)
+  usageCount   Int     @default(0)
 
-  portfolios   Portfolio[]
+  portfolios Portfolio[]
 
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([category])
   @@index([isPremium])
@@ -226,7 +220,7 @@ model PortfolioTemplate {
 }
 
 model PortfolioView {
-  id          String    @id @default(cuid())
+  id          String  @id @default(cuid())
   portfolioId String
   userId      String?
   visitorId   String?
@@ -236,19 +230,17 @@ model PortfolioView {
   city        String?
   device      String?
 
-  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
-  user        User?     @relation(fields: [userId], references: [id])
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  user      User?     @relation(fields: [userId], references: [id])
 
-  createdAt   DateTime  @default(now())
+  createdAt DateTime @default(now())
 
   @@index([portfolioId])
   @@index([createdAt])
   @@map("portfolio_views")
 }
 
-// =============================================================
 // RESUMES
-// =============================================================
 
 enum ResumeStatus {
   DRAFT
@@ -257,27 +249,27 @@ enum ResumeStatus {
 }
 
 model Resume {
-  id            String       @id @default(cuid())
-  userId        String
-  title         String
-  status        ResumeStatus @default(DRAFT)
-  targetRole    String?
-  targetCompany String?
-  jobDescription String?     @db.Text
-  sections      Json         @default("[]")
-  atsScore      Json?
-  fileUrl       String?
-  version       Int          @default(1)
-  downloadCount Int          @default(0)
+  id             String       @id @default(cuid())
+  userId         String
+  title          String
+  status         ResumeStatus @default(DRAFT)
+  targetRole     String?
+  targetCompany  String?
+  jobDescription String?      @db.Text
+  sections       Json         @default("[]")
+  atsScore       Json?
+  fileUrl        String?
+  version        Int          @default(1)
+  downloadCount  Int          @default(0)
 
   // Relations
-  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  versions      ResumeVersion[]
-  downloads     ResumeDownload[]
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  versions  ResumeVersion[]
+  downloads ResumeDownload[]
 
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  deletedAt     DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   @@index([userId])
   @@index([status])
@@ -285,14 +277,14 @@ model Resume {
 }
 
 model ResumeVersion {
-  id        String   @id @default(cuid())
+  id        String  @id @default(cuid())
   resumeId  String
   version   Int
   sections  Json
   atsScore  Json?
   changelog String?
 
-  resume    Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
@@ -301,14 +293,14 @@ model ResumeVersion {
 }
 
 model ResumeDownload {
-  id       String   @id @default(cuid())
+  id       String  @id @default(cuid())
   resumeId String
   userId   String?
-  format   String   // pdf, docx
+  format   String // pdf, docx
   source   String?
 
-  resume   Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
-  user     User?    @relation(fields: [userId], references: [id])
+  resume Resume @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
 
@@ -317,9 +309,7 @@ model ResumeDownload {
   @@map("resume_downloads")
 }
 
-// =============================================================
 // AI SYSTEM
-// =============================================================
 
 enum AIGenerationType {
   PORTFOLIO_BIO
@@ -356,11 +346,11 @@ model AIGeneration {
   retryCount  Int              @default(0)
   priority    String           @default("normal")
 
-  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   startedAt   DateTime?
   completedAt DateTime?
-  createdAt   DateTime         @default(now())
+  createdAt   DateTime  @default(now())
 
   @@index([userId])
   @@index([status])
@@ -370,82 +360,78 @@ model AIGeneration {
 }
 
 model AICredits {
-  id         String   @id @default(cuid())
-  userId     String   @unique
-  total      Int      @default(10)
-  used       Int      @default(0)
-  resetsAt   DateTime
+  id       String   @id @default(cuid())
+  userId   String   @unique
+  total    Int      @default(10)
+  used     Int      @default(0)
+  resetsAt DateTime
 
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  updatedAt  DateTime @updatedAt
+  updatedAt DateTime @updatedAt
 
   @@map("ai_credits")
 }
 
 model PromptTemplate {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  type        String
-  version     Int      @default(1)
+  id           String  @id @default(cuid())
+  name         String  @unique
+  type         String
+  version      Int     @default(1)
   systemPrompt String  @db.Text
-  userPrompt  String   @db.Text
-  model       String   @default("gpt-4o-mini")
-  temperature Float    @default(0.7)
-  maxTokens   Int      @default(2000)
-  isActive    Boolean  @default(true)
+  userPrompt   String  @db.Text
+  model        String  @default("gpt-4o-mini")
+  temperature  Float   @default(0.7)
+  maxTokens    Int     @default(2000)
+  isActive     Boolean @default(true)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([type])
   @@map("prompt_templates")
 }
 
-// =============================================================
 // SKILLS & CAREER
-// =============================================================
 
 model SkillAssessment {
-  id                String   @id @default(cuid())
-  userId            String
-  skills            Json     @default("[]")
+  id                 String  @id @default(cuid())
+  userId             String
+  skills             Json    @default("[]")
   employabilityScore Int     @default(0)
-  targetRole        String?
-  gaps              Json?
-  recommendations   Json?
-  sources           Json?
+  targetRole         String?
+  gaps               Json?
+  recommendations    Json?
+  sources            Json?
 
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@map("skill_assessments")
 }
 
 model CareerRoadmap {
-  id             String   @id @default(cuid())
+  id             String @id @default(cuid())
   userId         String
   currentRole    String
   targetRole     String
   timelineMonths Int
-  milestones     Json     @default("[]")
-  status         String   @default("active")
+  milestones     Json   @default("[]")
+  status         String @default("active")
 
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@map("career_roadmaps")
 }
 
-// =============================================================
 // INTEGRATIONS
-// =============================================================
 
 enum IntegrationProvider {
   GITHUB
@@ -470,7 +456,7 @@ model Integration {
   userId           String
   provider         IntegrationProvider
   status           IntegrationStatus   @default(DISCONNECTED)
-  externalUsername  String?
+  externalUsername String?
   profileUrl       String?
   accessToken      String?             @db.Text
   refreshToken     String?             @db.Text
@@ -478,19 +464,17 @@ model Integration {
   data             Json?
   lastSyncAt       DateTime?
 
-  user             User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt        DateTime            @default(now())
-  updatedAt        DateTime            @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([userId, provider])
   @@index([userId])
   @@map("integrations")
 }
 
-// =============================================================
 // BILLING & SUBSCRIPTIONS
-// =============================================================
 
 enum PlanTier {
   FREE
@@ -524,10 +508,10 @@ model Plan {
   stripePriceIdYearly  String?
   isActive             Boolean  @default(true)
 
-  subscriptions        Subscription[]
+  subscriptions Subscription[]
 
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("plans")
 }
@@ -543,11 +527,11 @@ model Subscription {
   currentPeriodEnd     DateTime
   cancelAtPeriodEnd    Boolean            @default(false)
 
-  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  plan                 Plan               @relation(fields: [planId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan Plan @relation(fields: [planId], references: [id])
 
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([status])
@@ -555,41 +539,39 @@ model Subscription {
 }
 
 model Payment {
-  id                String   @id @default(cuid())
+  id                String  @id @default(cuid())
   userId            String
-  amount            Int      // in cents
-  currency          String   @default("USD")
-  status            String   // succeeded, pending, failed
-  provider          String   // stripe, chapa
+  amount            Int // in cents
+  currency          String  @default("USD")
+  status            String // succeeded, pending, failed
+  provider          String // stripe, chapa
   providerPaymentId String?
   description       String?
   invoiceUrl        String?
   metadata          Json?
 
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt         DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([userId])
   @@index([createdAt])
   @@map("payments")
 }
 
-// =============================================================
 // NOTIFICATIONS & AUDIT
-// =============================================================
 
 model Notification {
-  id        String   @id @default(cuid())
-  userId    String
-  type      String
-  title     String
-  message   String   @db.Text
-  read      Boolean  @default(false)
-  data      Json?
-  link      String?
+  id      String  @id @default(cuid())
+  userId  String
+  type    String
+  title   String
+  message String  @db.Text
+  read    Boolean @default(false)
+  data    Json?
+  link    String?
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
@@ -600,7 +582,7 @@ model Notification {
 }
 
 model AuditLog {
-  id        String   @id @default(cuid())
+  id        String  @id @default(cuid())
   userId    String?
   action    String
   entity    String
@@ -610,7 +592,7 @@ model AuditLog {
   ipAddress String?
   userAgent String?
 
-  user      User?    @relation(fields: [userId], references: [id])
+  user User? @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
 
