@@ -30,7 +30,7 @@ export default function PortfolioPage() {
         <div className="rounded-xl border border-red-100 bg-red-50 p-4 text-sm text-red-600">
           Failed to load portfolios
         </div>
-      ) : !data || data.length === 0 ? (
+      ) : !data?.data || data.data.length === 0 ? (
         <div className="rounded-xl border border-gray-200 border-dashed bg-gray-50 p-12 text-center">
           <Globe className="mx-auto h-12 w-12 text-gray-300" />
           <h3 className="mt-4 text-sm font-medium text-gray-900">No portfolios yet</h3>
@@ -38,7 +38,7 @@ export default function PortfolioPage() {
         </div>
       ) : (
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {data.map((portfolio: any) => (
+          {data.data.map((portfolio: any) => (
             <Link href={`/portfolio/${portfolio.id}/editor`} key={portfolio.id} className="group rounded-xl border border-gray-200/60 bg-white p-5 transition-all hover:shadow-lg dark:border-gray-700/60 dark:bg-gray-900">
               <div className="flex h-32 items-center justify-center rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30">
                 <Globe className="h-10 w-10 text-blue-300" />

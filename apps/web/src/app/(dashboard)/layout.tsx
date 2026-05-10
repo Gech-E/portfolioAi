@@ -5,8 +5,9 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Globe, FileText, Sparkles,
   BarChart3, Route, Plug, Settings,
-  Briefcase, ChevronDown, Search, Plus, Bell,
+  Briefcase, Search, Plus, Bell,
 } from 'lucide-react';
+import { api } from '@/lib/api';
 
 const mainNav = [
   { label: 'Workspace', items: [

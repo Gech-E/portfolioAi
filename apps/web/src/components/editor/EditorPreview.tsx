@@ -2,12 +2,9 @@
 
 import React from 'react';
 import { 
-  Mail, 
   MapPin, 
-  Link as LinkIcon, 
   Github, 
-  Linkedin,
-  ExternalLink
+  Linkedin
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@portfolioai/ui';

@@ -6,10 +6,10 @@ import { toast } from 'sonner';
 import { api } from '@/lib/api';
 
 const tools = [
-  { title: 'Generate Bio', desc: 'Create a professional About section powered by AI', icon: UserCircle, color: 'bg-purple-50 text-purple-700', credits: 1 },
-  { title: 'Optimize Resume', desc: 'ATS-optimize your resume for a target role', icon: FileText, color: 'bg-sky-50 text-sky-700', credits: 3 },
-  { title: 'Write Case Study', desc: 'Turn your projects into compelling case studies', icon: ClipboardList, color: 'bg-green-50 text-green-700', credits: 3 },
-  { title: 'Generate README', desc: 'Auto-generate documentation for GitHub repos', icon: Github, color: 'bg-amber-50 text-amber-700', credits: 1 },
+  { type: 'BIO', title: 'Generate Bio', desc: 'Create a professional About section powered by AI', icon: UserCircle, color: 'bg-purple-50 text-purple-700', credits: 1 },
+  { type: 'RESUME_OPTIMIZATION', title: 'Optimize Resume', desc: 'ATS-optimize your resume for a target role', icon: FileText, color: 'bg-sky-50 text-sky-700', credits: 3 },
+  { type: 'CASE_STUDY', title: 'Write Case Study', desc: 'Turn your projects into compelling case studies', icon: ClipboardList, color: 'bg-green-50 text-green-700', credits: 3 },
+  { type: 'README', title: 'Generate README', desc: 'Auto-generate documentation for GitHub repos', icon: Github, color: 'bg-amber-50 text-amber-700', credits: 1 },
   { type: 'LINKEDIN_SUMMARY', title: 'LinkedIn Summary', desc: 'Create a recruiter-optimized LinkedIn summary', icon: Linkedin, color: 'bg-red-50 text-red-700', credits: 1 },
   { type: 'SKILL_ANALYSIS', title: 'Career Roadmap', desc: 'Get a personalized skill development plan', icon: Route, color: 'bg-cyan-50 text-cyan-700', credits: 4 },
 ];
@@ -17,7 +17,7 @@ const tools = [
 export default function AIToolsPage() {
   const [generating, setGenerating] = useState<string | null>(null);
 
-  const handleGenerate = async (type: string, credits: number) => {
+  const handleGenerate = async (type: string) => {
     setGenerating(type);
     toast.info('Starting AI generation...', { id: `gen-${type}` });
     
@@ -56,7 +56,7 @@ export default function AIToolsPage() {
         {tools.map((tool) => (
           <button 
             key={tool.title} 
-            onClick={() => handleGenerate(tool.type, tool.credits)}
+            onClick={() => handleGenerate(tool.type)}
             disabled={generating !== null}
             className="group flex flex-col rounded-xl border border-gray-200/60 bg-white p-6 text-left transition-all hover:border-blue-200 hover:shadow-lg disabled:opacity-50 disabled:hover:border-gray-200/60 disabled:hover:shadow-none dark:border-gray-700/60 dark:bg-gray-900"
           >

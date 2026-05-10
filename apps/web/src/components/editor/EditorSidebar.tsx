@@ -7,7 +7,6 @@ import {
   Code, 
   GraduationCap, 
   Layout, 
-  Layers, 
   Settings,
   Star,
   FileText

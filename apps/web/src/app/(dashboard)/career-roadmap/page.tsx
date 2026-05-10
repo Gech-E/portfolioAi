@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Route, Target, BookOpen, Award, Loader2, ChevronRight, CheckCircle2 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Route, Target, BookOpen, Award, Loader2, CheckCircle2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
 

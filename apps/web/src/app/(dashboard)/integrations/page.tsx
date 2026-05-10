@@ -78,7 +78,12 @@ export default function IntegrationsPage() {
         <p className="mt-1 text-gray-500 dark:text-gray-400">Connect your professional profiles to auto-populate your portfolio</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {loading ? (
+        <div className="flex h-64 items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {providers.map((p) => {
           const integration = integrations.find(i => i.provider === p.id);
           const isConnected = integration?.status === 'CONNECTED';
@@ -148,6 +153,7 @@ export default function IntegrationsPage() {
           );
         })}
       </div>
+      )}
 
       <div className="mt-12 bg-blue-600 rounded-2xl p-8 text-white relative overflow-hidden shadow-xl">
         <div className="relative z-10">

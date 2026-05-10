@@ -49,14 +49,14 @@ export function EditorMain({ section, data, onUpdate }: EditorMainProps) {
     onUpdate({ [name]: value });
   };
 
-  const handleDeepChange = (parent: string, field: string, value: any) => {
-    onUpdate({
-      [parent]: {
-        ...data[parent],
-        [field]: value,
-      }
-    });
-  };
+  // const handleDeepChange = (parent: string, field: string, value: any) => {
+  //   onUpdate({
+  //     [parent]: {
+  //       ...data[parent],
+  //       [field]: value,
+  //     }
+  //   });
+  // };
 
   const renderBasics = () => (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
@@ -173,11 +173,11 @@ export function EditorMain({ section, data, onUpdate }: EditorMainProps) {
               <div className="grid gap-4 flex-1 md:grid-cols-2">
                 <div className="space-y-1">
                   <Label className="text-[10px] uppercase text-gray-400">Company</Label>
-                  <Input placeholder="Tech Corp" variant="ghost" className="h-8 px-0 font-medium" />
+                  <Input placeholder="Tech Corp" className="h-8 px-0 font-medium border-transparent shadow-none focus-visible:ring-0" />
                 </div>
                 <div className="space-y-1">
                   <Label className="text-[10px] uppercase text-gray-400">Role</Label>
-                  <Input placeholder="Senior Developer" variant="ghost" className="h-8 px-0" />
+                  <Input placeholder="Senior Developer" className="h-8 px-0 border-transparent shadow-none focus-visible:ring-0" />
                 </div>
               </div>
               <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-red-500">

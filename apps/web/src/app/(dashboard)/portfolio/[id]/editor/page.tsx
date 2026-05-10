@@ -9,12 +9,7 @@ import {
   Eye, 
   Sparkles, 
   Layout, 
-  User, 
-  Briefcase, 
-  Code, 
-  MessageSquare,
-  Globe,
-  Loader2,
+  Loader2, 
   CheckCircle2
 } from 'lucide-react';
 import { api } from '@/lib/api';

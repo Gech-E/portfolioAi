@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FileText, Plus, Search, MoreVertical, Download, ExternalLink, Clock, Trash2, Loader2 } from 'lucide-react';
+import { FileText, Plus, Search, Clock, Trash2, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';

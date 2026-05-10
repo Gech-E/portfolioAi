@@ -1,7 +1,7 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
-import { Globe, Mail, MapPin, Github, Linkedin, ExternalLink } from 'lucide-react';
+import { Globe, Mail, MapPin, Github, Linkedin } from 'lucide-react';
 import { Badge } from '@portfolioai/ui';
 
 // This is a Server Component
@@ -22,8 +22,9 @@ async function getPortfolio(slug: string) {
   }
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const portfolio = await getPortfolio(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const portfolio = await getPortfolio(slug);
   if (!portfolio) return { title: 'Portfolio Not Found' };
 
   return {
@@ -37,8 +38,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default async function PublicPortfolioPage({ params }: { params: { slug: string } }) {
-  const portfolio = await getPortfolio(params.slug);
+export default async function PublicPortfolioPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const portfolio = await getPortfolio(slug);
 
   if (!portfolio) {
     notFound();

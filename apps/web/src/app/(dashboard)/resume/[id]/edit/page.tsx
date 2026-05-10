@@ -7,15 +7,10 @@ import {
   Plus, 
   Sparkles, 
   Download, 
-  Eye, 
-  Layout, 
   Type, 
-  Loader2, 
-  GripVertical,
-  Trash2,
-  AlertCircle
+  Loader2,
+  Layout
 } from 'lucide-react';
-import { motion, Reorder } from 'framer-motion';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import Link from 'next/link';
