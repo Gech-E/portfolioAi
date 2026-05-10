@@ -28,7 +28,8 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterInput) => {
     setIsLoading(true);
     try {
-      const response = await api.post<{ user: any; tokens: { accessToken: string } }>('/auth/register', data);
+      const { confirmPassword, ...registerData } = data;
+      const response = await api.post<{ user: any; tokens: { accessToken: string } }>('/auth/register', registerData);
       if (response.success && response.data) {
         login(response.data.user, response.data.tokens.accessToken);
         toast.success('Account created successfully');

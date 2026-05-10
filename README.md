@@ -50,7 +50,7 @@ This is a monorepo built with Turborepo, containing:
    ```bash
    pnpm dev
    ```
-   This will start the Next.js app on `http://localhost:3000` and the NestJS API on `http://localhost:4000`.
+   This will start the Next.js app on `http://localhost:3005` and the NestJS API on `http://localhost:4005`.
 
 5. (Optional) Start the AI service in a separate terminal:
    ```bash
