@@ -20,6 +20,22 @@ class ExperienceOutput(BaseModel):
     achievements: List[str] = Field(description="List of 3-5 high-impact bullet points")
     keywords: List[str] = Field(description="Relevant keywords for ATS optimization")
 
+class RoadmapMilestone(BaseModel):
+    title: str = Field(description="Milestone title")
+    description: str = Field(description="Milestone description")
+    resources: List[str] = Field(description="Recommended resources (links or names)")
+    duration: str = Field(description="Estimated time to complete")
+
+class RoadmapOutput(BaseModel):
+    milestones: List[RoadmapMilestone] = Field(description="List of milestones to reach target role")
+    summary: str = Field(description="Brief overview of the roadmap")
+
+class SkillAnalysisOutput(BaseModel):
+    skills: List[str] = Field(description="Detected user skills")
+    employabilityScore: int = Field(description="Score from 0-100")
+    gaps: List[str] = Field(description="Identified skill gaps for target role")
+    recommendations: List[str] = Field(description="Actionable recommendations")
+
 # Prompt templates mapping
 PROMPT_MAP = {
     "PORTFOLIO_BIO": {
@@ -33,6 +49,24 @@ PROMPT_MAP = {
         "user_template": "Company: {company}. Role: {role}. Description: {description}. Tech: {technologies}.",
         "model": settings.openai_model_primary,
         "output_model": ExperienceOutput,
+    },
+    "RESUME_OPTIMIZE": {
+        "system": "You are an ATS expert. Optimize the user's resume content for the provided job description. Focus on keyword density and achievement-based bullet points.",
+        "user_template": "Resume Content: {resume}. Job Description: {jobDescription}.",
+        "model": settings.openai_model_primary,
+        "output_model": ExperienceOutput, # Reuse for now or define ResumeOutput
+    },
+    "CAREER_ROADMAP": {
+        "system": "You are a career coach. Generate a step-by-step roadmap to help the user transition from their current role to their target role.",
+        "user_template": "Current Role: {currentRole}. Target Role: {targetRole}. Timeline: {timelineMonths} months.",
+        "model": settings.openai_model_primary,
+        "output_model": RoadmapOutput,
+    },
+    "SKILL_ANALYSIS": {
+        "system": "You are a talent analyzer. Assess the user's skills against their target role and identify gaps.",
+        "user_template": "Target Role: {targetRole}. Context: {context}.",
+        "model": settings.openai_model_primary,
+        "output_model": SkillAnalysisOutput,
     },
 }
 
