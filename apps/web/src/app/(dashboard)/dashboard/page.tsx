@@ -1,20 +1,99 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import {
   Eye, Download, Sparkles, UserCheck, TrendingUp,
   Code, Palette, Bot, PenLine,
   UserCircle, FileText, ClipboardList, Github, Linkedin, ArrowRight,
-  Globe, Check,
+  Globe, Check, Loader2,
 } from 'lucide-react';
+import { api } from '@/lib/api';
+
+interface OverviewData {
+  stats: {
+    totalViews: number;
+    totalDownloads: number;
+    portfolioCount: number;
+    resumeCount: number;
+    aiGenerations: number;
+    recentViews: number;
+    uniqueVisitors: number;
+    engagementRate: string;
+  };
+  viewsChart: { date: string; views: number }[];
+  referrers: { source: string; count: number }[];
+}
+
+interface Portfolio {
+  id: string;
+  title: string;
+  slug: string;
+  status: string;
+  viewCount: number;
+  templateId: string | null;
+}
+
+interface Credits {
+  total: number;
+  used: number;
+}
 
 export default function DashboardPage() {
+  const [overview, setOverview] = useState<OverviewData | null>(null);
+  const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
+  const [credits, setCredits] = useState<Credits | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      const [overviewRes, portfoliosRes, creditsRes] = await Promise.allSettled([
+        api.get<OverviewData>('/analytics/overview'),
+        api.get<Portfolio[]>('/portfolios'),
+        api.get<Credits>('/ai/credits'),
+      ]);
+
+      if (overviewRes.status === 'fulfilled') setOverview(overviewRes.value.data as any);
+      if (portfoliosRes.status === 'fulfilled') setPortfolios((portfoliosRes.value.data as any) || []);
+      if (creditsRes.status === 'fulfilled') setCredits(creditsRes.value.data as any);
+    } catch {
+      // Silently handle — dashboard still renders with fallbacks
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const stats = overview?.stats;
+  const creditsRemaining = credits ? credits.total - credits.used : 0;
+
+  const portfolioIcons = [
+    { icon: Code, iconColor: 'text-purple-700', iconBg: 'bg-purple-50' },
+    { icon: Palette, iconColor: 'text-sky-700', iconBg: 'bg-sky-50' },
+    { icon: Bot, iconColor: 'text-green-700', iconBg: 'bg-green-50' },
+    { icon: PenLine, iconColor: 'text-amber-700', iconBg: 'bg-amber-50' },
+  ];
+
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
   return (
     <div className="animate-in space-y-7">
       {/* Stats Grid */}
       <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
         {[
-          { label: 'Portfolio views', value: '3,842', change: '+18% this month', trend: 'up', icon: Eye },
-          { label: 'Resume downloads', value: '124', change: '+7 this week', trend: 'up', icon: Download },
-          { label: 'AI credits left', value: '38', change: 'of 50/month used', trend: 'flat', icon: Sparkles },
-          { label: 'Employability score', value: '74', change: '+6 pts since last month', trend: 'up', icon: UserCheck },
+          { label: 'Portfolio views', value: stats?.totalViews?.toLocaleString() || '0', change: `${stats?.recentViews || 0} this month`, trend: 'up', icon: Eye },
+          { label: 'Resume downloads', value: stats?.totalDownloads?.toLocaleString() || '0', change: 'total downloads', trend: 'up', icon: Download },
+          { label: 'AI credits left', value: String(creditsRemaining), change: `of ${credits?.total || 0}/month`, trend: 'flat', icon: Sparkles },
+          { label: 'Portfolios', value: String(stats?.portfolioCount || 0), change: `${stats?.aiGenerations || 0} AI generations`, trend: 'up', icon: UserCheck },
         ].map((stat) => (
           <div
             key={stat.label}
@@ -43,36 +122,37 @@ export default function DashboardPage() {
           <div className="rounded-xl border border-gray-200/60 bg-white p-5 dark:border-gray-700/60 dark:bg-gray-900">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-sm font-medium text-gray-900 dark:text-white">My portfolios</h3>
-              <div className="flex gap-0.5 rounded-lg bg-gray-100 p-1 dark:bg-gray-800">
-                <button className="rounded-md bg-white px-3 py-1 text-xs font-medium text-gray-900 shadow-sm dark:bg-gray-700 dark:text-white">All</button>
-                <button className="rounded-md px-3 py-1 text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400">Live</button>
-                <button className="rounded-md px-3 py-1 text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400">Drafts</button>
-              </div>
+              <Link href="/portfolio/new" className="text-xs text-blue-600 hover:underline font-medium">
+                + New
+              </Link>
             </div>
-            {[
-              { name: 'Full-Stack Developer Portfolio', url: 'alexjohnson.portfolioai.com', status: 'Live', views: '2,104', icon: Code, iconColor: 'text-purple-700', iconBg: 'bg-purple-50' },
-              { name: 'UX & Design Showcase', url: 'alex-design.portfolioai.com', status: 'Draft', views: '—', icon: Palette, iconColor: 'text-sky-700', iconBg: 'bg-sky-50' },
-              { name: 'AI & ML Projects', url: 'alex-ml.portfolioai.com', status: 'Live', views: '1,738', icon: Bot, iconColor: 'text-green-700', iconBg: 'bg-green-50' },
-              { name: 'Technical Writing Portfolio', url: 'Not published yet', status: 'AI generating…', views: '—', icon: PenLine, iconColor: 'text-amber-700', iconBg: 'bg-amber-50' },
-            ].map((p) => (
-              <div key={p.name} className="flex items-center gap-3 border-b border-gray-100 py-2.5 last:border-b-0 last:pb-0 dark:border-gray-800">
-                <div className={`flex h-[38px] w-[38px] flex-shrink-0 items-center justify-center rounded-lg ${p.iconBg}`}>
-                  <p.icon className={`h-[17px] w-[17px] ${p.iconColor}`} />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-[13px] font-medium text-gray-900 dark:text-white">{p.name}</p>
-                  <p className="text-xs text-gray-400">{p.url}</p>
-                </div>
-                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${
-                  p.status === 'Live' ? 'bg-green-50 text-green-700' :
-                  p.status === 'Draft' ? 'bg-gray-100 text-gray-600' :
-                  'bg-purple-50 text-purple-700'
-                }`}>{p.status}</span>
-                <span className="flex items-center gap-1 text-xs text-gray-400 whitespace-nowrap">
-                  {p.views !== '—' && <Eye className="h-3 w-3" />} {p.views}
-                </span>
+            {portfolios.length === 0 ? (
+              <div className="py-8 text-center text-sm text-gray-400">
+                <Globe className="mx-auto h-8 w-8 mb-2 text-gray-300" />
+                No portfolios yet. <Link href="/portfolio/new" className="text-blue-600 hover:underline">Create one</Link>
               </div>
-            ))}
+            ) : (
+              portfolios.slice(0, 4).map((p, idx) => {
+                const iconSet = portfolioIcons[idx % portfolioIcons.length];
+                return (
+                  <Link href={`/portfolio/${p.id}/editor`} key={p.id} className="flex items-center gap-3 border-b border-gray-100 py-2.5 last:border-b-0 last:pb-0 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg px-2 -mx-2 transition-colors">
+                    <div className={`flex h-[38px] w-[38px] flex-shrink-0 items-center justify-center rounded-lg ${iconSet.iconBg}`}>
+                      <iconSet.icon className={`h-[17px] w-[17px] ${iconSet.iconColor}`} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[13px] font-medium text-gray-900 dark:text-white">{p.title || p.slug}</p>
+                      <p className="text-xs text-gray-400">{p.slug}.portfolioai.com</p>
+                    </div>
+                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                      p.status === 'PUBLISHED' ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'
+                    }`}>{p.status === 'PUBLISHED' ? 'Live' : 'Draft'}</span>
+                    <span className="flex items-center gap-1 text-xs text-gray-400 whitespace-nowrap">
+                      {p.viewCount > 0 && <Eye className="h-3 w-3" />} {p.viewCount > 0 ? p.viewCount.toLocaleString() : '—'}
+                    </span>
+                  </Link>
+                );
+              })
+            )}
           </div>
 
           {/* Skill Profile */}
@@ -104,9 +184,9 @@ export default function DashboardPage() {
                 </div>
               ))}
             </div>
-            <button className="mt-4 w-full rounded-lg border border-gray-200 py-2 text-[13px] text-gray-500 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800">
+            <Link href="/career-roadmap" className="mt-4 block w-full rounded-lg border border-gray-200 py-2 text-center text-[13px] text-gray-500 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800">
               Run AI skill gap analysis ↗
-            </button>
+            </Link>
           </div>
         </div>
 
@@ -117,14 +197,15 @@ export default function DashboardPage() {
             <h3 className="mb-4 text-sm font-medium text-gray-900 dark:text-white">AI tools</h3>
             <div className="space-y-2.5">
               {[
-                { title: 'Generate bio', desc: 'Rewrite your About section', icon: UserCircle, iconBg: 'bg-purple-50', iconColor: 'text-purple-700' },
-                { title: 'Optimize resume', desc: 'Target a specific job role', icon: FileText, iconBg: 'bg-sky-50', iconColor: 'text-sky-700' },
-                { title: 'Write case study', desc: 'From your GitHub projects', icon: ClipboardList, iconBg: 'bg-green-50', iconColor: 'text-green-700' },
-                { title: 'Generate README', desc: 'Auto-document your repos', icon: Github, iconBg: 'bg-amber-50', iconColor: 'text-amber-700' },
-                { title: 'Improve LinkedIn', desc: 'Recruiter-optimized summary', icon: Linkedin, iconBg: 'bg-red-50', iconColor: 'text-red-700' },
+                { title: 'Generate bio', desc: 'Rewrite your About section', icon: UserCircle, iconBg: 'bg-purple-50', iconColor: 'text-purple-700', href: '/ai-tools' },
+                { title: 'Optimize resume', desc: 'Target a specific job role', icon: FileText, iconBg: 'bg-sky-50', iconColor: 'text-sky-700', href: '/ai-tools' },
+                { title: 'Write case study', desc: 'From your GitHub projects', icon: ClipboardList, iconBg: 'bg-green-50', iconColor: 'text-green-700', href: '/ai-tools' },
+                { title: 'Generate README', desc: 'Auto-document your repos', icon: Github, iconBg: 'bg-amber-50', iconColor: 'text-amber-700', href: '/ai-tools' },
+                { title: 'Improve LinkedIn', desc: 'Recruiter-optimized summary', icon: Linkedin, iconBg: 'bg-red-50', iconColor: 'text-red-700', href: '/ai-tools' },
               ].map((tool) => (
-                <button
+                <Link
                   key={tool.title}
+                  href={tool.href}
                   className="flex w-full items-center gap-3 rounded-lg border border-gray-100 bg-white p-3 text-left transition-colors hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-gray-800"
                 >
                   <div className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg ${tool.iconBg}`}>
@@ -135,7 +216,7 @@ export default function DashboardPage() {
                     <p className="text-xs text-gray-400">{tool.desc}</p>
                   </div>
                   <ArrowRight className="h-[15px] w-[15px] text-gray-300" />
-                </button>
+                </Link>
               ))}
             </div>
           </div>
@@ -143,11 +224,6 @@ export default function DashboardPage() {
           {/* ATS Score */}
           <div className="rounded-xl border border-gray-200/60 bg-white p-5 dark:border-gray-700/60 dark:bg-gray-900">
             <h3 className="mb-3 text-sm font-medium text-gray-900 dark:text-white">Resume ATS score</h3>
-            <div className="flex gap-0.5 rounded-lg bg-gray-100 p-1 mb-4 dark:bg-gray-800">
-              <button className="rounded-md bg-white px-3 py-1 text-xs font-medium text-gray-900 shadow-sm dark:bg-gray-700 dark:text-white">SE — Senior Role</button>
-              <button className="rounded-md px-3 py-1 text-xs text-gray-500">PM Role</button>
-            </div>
-            {/* Score ring */}
             <div className="flex flex-col items-center py-4">
               <div className="relative" style={{ width: 88, height: 88 }}>
                 <svg width={88} height={88} viewBox="0 0 88 88" fill="none">
@@ -161,17 +237,15 @@ export default function DashboardPage() {
               </div>
               <p className="mt-2.5 text-center text-[13px] text-gray-500">Good — minor improvements will push you to 85+</p>
             </div>
-            {/* Chips */}
             <div className="flex flex-wrap gap-1.5">
-              <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-medium text-green-700"><Check className="h-2.5 w-2.5" /> Keywords matched</span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-medium text-green-700"><Check className="h-2.5 w-2.5" /> Formatting</span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-medium text-green-700"><Check className="h-2.5 w-2.5" />Keywords matched</span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-medium text-green-700"><Check className="h-2.5 w-2.5" />Formatting</span>
               <span className="rounded-full bg-yellow-50 px-2.5 py-1 text-[11px] font-medium text-yellow-700">Weak action verbs</span>
               <span className="rounded-full bg-red-50 px-2.5 py-1 text-[11px] font-medium text-red-700">Missing: AWS cert</span>
-              <span className="rounded-full bg-red-50 px-2.5 py-1 text-[11px] font-medium text-red-700">Missing: system design</span>
             </div>
-            <button className="mt-4 w-full rounded-lg border border-gray-200 py-2 text-[13px] text-gray-500 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800">
+            <Link href="/ai-tools" className="mt-4 block w-full rounded-lg border border-gray-200 py-2 text-center text-[13px] text-gray-500 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800">
               Auto-fix with AI ↗
-            </button>
+            </Link>
           </div>
 
           {/* Recent Activity */}
@@ -179,9 +253,9 @@ export default function DashboardPage() {
             <h3 className="mb-4 text-sm font-medium text-gray-900 dark:text-white">Recent activity</h3>
             <div className="space-y-0">
               {[
-                { text: 'AI generated your ML portfolio bio', time: '2 hours ago', icon: Sparkles, iconBg: 'bg-purple-50', iconColor: 'text-purple-700' },
-                { text: 'Full-Stack portfolio published', time: 'Yesterday', icon: Globe, iconBg: 'bg-green-50', iconColor: 'text-green-700' },
-                { text: '12 GitHub repos imported', time: '2 days ago', icon: Github, iconBg: 'bg-sky-50', iconColor: 'text-sky-700' },
+                { text: 'AI generated your portfolio bio', time: '2 hours ago', icon: Sparkles, iconBg: 'bg-purple-50', iconColor: 'text-purple-700' },
+                { text: 'Portfolio published', time: 'Yesterday', icon: Globe, iconBg: 'bg-green-50', iconColor: 'text-green-700' },
+                { text: 'GitHub repos imported', time: '2 days ago', icon: Github, iconBg: 'bg-sky-50', iconColor: 'text-sky-700' },
                 { text: 'Resume optimized for SE role', time: '3 days ago', icon: FileText, iconBg: 'bg-amber-50', iconColor: 'text-amber-700' },
               ].map((item) => (
                 <div key={item.text} className="flex items-start gap-3 border-b border-gray-100 py-2.5 last:border-b-0 dark:border-gray-800">
