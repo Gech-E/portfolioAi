@@ -1,0 +1,59 @@
+.container {
+  @apply space-y-6 animate-in fade-in slide-in-from-bottom-2;
+}
+
+.heading {
+  @apply text-lg font-semibold text-gray-900 dark:text-white;
+}
+
+.subtext {
+  @apply text-sm text-gray-500;
+}
+
+.grid {
+  @apply grid gap-6;
+}
+
+.section {
+  @apply space-y-2;
+}
+
+.templateGrid {
+  @apply grid grid-cols-2 md:grid-cols-3 gap-4;
+}
+
+.templateCard {
+  @apply cursor-pointer rounded-lg border-2 p-4 text-center transition-all;
+}
+
+.templateSelected {
+  @apply border-blue-600 bg-blue-50 dark:bg-blue-900/20;
+}
+
+.templateUnselected {
+  @apply border-gray-200 hover:border-blue-300 dark:border-gray-800;
+}
+
+.templateImagePlaceholder {
+  @apply h-20 bg-gray-100 dark:bg-gray-800 rounded mb-2 w-full mx-auto;
+}
+
+.templateName {
+  @apply text-sm font-medium capitalize dark:text-white;
+}
+
+.colorRow {
+  @apply flex gap-2;
+}
+
+.colorButton {
+  @apply w-8 h-8 rounded-full border-2 transition-transform;
+}
+
+.colorSelected {
+  @apply border-gray-900 dark:border-white scale-110;
+}
+
+.colorUnselected {
+  @apply border-transparent hover:scale-105;
+}

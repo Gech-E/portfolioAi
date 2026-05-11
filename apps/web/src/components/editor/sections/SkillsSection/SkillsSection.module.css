@@ -1,0 +1,43 @@
+.container {
+  @apply space-y-6 animate-in fade-in slide-in-from-bottom-2;
+}
+
+.heading {
+  @apply text-lg font-semibold text-gray-900 dark:text-white;
+}
+
+.subtext {
+  @apply text-sm text-gray-500;
+}
+
+.content {
+  @apply space-y-4;
+}
+
+.form {
+  @apply flex gap-2;
+}
+
+.input {
+  @apply max-w-md;
+}
+
+.skillsList {
+  @apply flex flex-wrap gap-2 mt-4;
+}
+
+.skillItem {
+  @apply flex items-center gap-1 px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-full text-sm;
+}
+
+.removeButton {
+  @apply text-gray-400 hover:text-red-500 rounded-full p-0.5;
+}
+
+.removeIcon {
+  @apply h-3 w-3;
+}
+
+.emptyState {
+  @apply text-sm text-gray-500 italic;
+}

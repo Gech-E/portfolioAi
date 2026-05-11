@@ -1,0 +1,75 @@
+.container {
+  @apply space-y-6 animate-in fade-in slide-in-from-bottom-2;
+}
+
+.header {
+  @apply flex items-center justify-between;
+}
+
+.heading {
+  @apply text-lg font-semibold text-gray-900 dark:text-white;
+}
+
+.subtext {
+  @apply text-sm text-gray-500;
+}
+
+.iconPlus {
+  @apply mr-2 h-4 w-4;
+}
+
+.list {
+  @apply space-y-4;
+}
+
+.emptyState {
+  @apply text-center p-8 border border-dashed border-gray-300 dark:border-gray-700 rounded-lg text-gray-500;
+}
+
+.card {
+  @apply p-4 relative group dark:bg-gray-900 border-gray-200 dark:border-gray-800;
+}
+
+.dragHandle {
+  @apply absolute left-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab;
+}
+
+.dragIcon {
+  @apply h-4 w-4 text-gray-300;
+}
+
+.cardContent {
+  @apply ml-4 flex items-start justify-between;
+}
+
+.gridContainer {
+  @apply grid gap-4 flex-1;
+}
+
+.row {
+  @apply grid md:grid-cols-2 gap-4;
+}
+
+.inputGroup {
+  @apply space-y-1;
+}
+
+.label {
+  @apply text-[10px] uppercase text-gray-400;
+}
+
+.inputBold {
+  @apply h-8 px-2 font-medium focus-visible:ring-1;
+}
+
+.input {
+  @apply h-8 px-2 focus-visible:ring-1;
+}
+
+.deleteButton {
+  @apply ml-2 h-8 w-8 text-gray-400 hover:text-red-500;
+}
+
+.deleteIcon {
+  @apply h-4 w-4;
+}

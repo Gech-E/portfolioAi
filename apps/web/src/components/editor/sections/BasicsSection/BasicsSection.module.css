@@ -1,0 +1,31 @@
+.container {
+  @apply space-y-6 animate-in fade-in slide-in-from-bottom-2;
+}
+
+.heading {
+  @apply text-lg font-semibold text-gray-900 dark:text-white;
+}
+
+.subtext {
+  @apply text-sm text-gray-500;
+}
+
+.grid {
+  @apply grid gap-4 md:grid-cols-2;
+}
+
+.inputGroup {
+  @apply space-y-2;
+}
+
+.relativeWrap {
+  @apply relative;
+}
+
+.slugPrefix {
+  @apply absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400;
+}
+
+.slugInput {
+  @apply pl-7;
+}
