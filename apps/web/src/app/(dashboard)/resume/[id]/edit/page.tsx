@@ -226,7 +226,7 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
                     <input
                       type="text"
                       placeholder="e.g. Senior Frontend Engineer"
-                      className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+                      className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
                       value={resume.targetRole || ''}
                       onChange={(e) => setResume({ ...resume, targetRole: e.target.value })}
                     />
@@ -236,7 +236,7 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
                     <textarea
                       rows={3}
                       placeholder="Paste the job description here..."
-                      className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+                      className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg px-4 py-2 text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
                       value={resume.jobDescription || ''}
                       onChange={(e) => setResume({ ...resume, jobDescription: e.target.value })}
                     />
@@ -306,7 +306,7 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
                 <h3 className="font-bold text-gray-900 dark:text-white">Resume Content</h3>
                 <div className="flex gap-2">
                   <select 
-                    className="text-sm border border-gray-200 dark:border-gray-800 rounded-lg px-2 py-1 bg-white dark:bg-gray-900"
+                    className="text-sm border border-gray-200 dark:border-gray-800 rounded-lg px-2 py-1 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
                     onChange={(e) => {
                       if (e.target.value) {
                         addSection(e.target.value as any, e.target.value.charAt(0).toUpperCase() + e.target.value.slice(1));
@@ -364,7 +364,7 @@ export default function ResumeEditorPage({ params }: { params: Promise<{ id: str
                                 }} />
                               </div>
                               <textarea 
-                                className="w-full text-sm p-2 border border-gray-200 dark:border-gray-800 rounded-md dark:bg-gray-950" 
+                                className="w-full text-sm p-2 border border-gray-200 dark:border-gray-800 rounded-md bg-white dark:bg-gray-950 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500" 
                                 rows={2} 
                                 placeholder="Description (bullet points recommended)"
                                 value={item.description || ''}
