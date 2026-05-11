@@ -1,0 +1,23 @@
+.container {
+  @apply animate-in space-y-7;
+}
+
+.layout {
+  @apply grid grid-cols-1 gap-5 lg:grid-cols-[1fr_380px];
+}
+
+.leftColumn {
+  @apply space-y-5;
+}
+
+.rightColumn {
+  @apply space-y-5;
+}
+
+.loaderContainer {
+  @apply flex h-64 items-center justify-center;
+}
+
+.loaderIcon {
+  @apply h-8 w-8 animate-spin text-blue-600;
+}

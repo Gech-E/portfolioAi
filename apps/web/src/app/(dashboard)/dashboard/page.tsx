@@ -1,14 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import {
-  Eye, Download, Sparkles, UserCheck, TrendingUp,
-  Code, Palette, Bot, PenLine,
-  UserCircle, FileText, ClipboardList, Github, Linkedin, ArrowRight,
-  Globe, Check, Loader2,
-} from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { api } from '@/lib/api';
+import styles from './Dashboard.module.css';
+
+import { StatsGrid } from './components/StatsGrid/StatsGrid';
+import { PortfolioList } from './components/PortfolioList/PortfolioList';
+import { AIToolsList } from './components/AIToolsList/AIToolsList';
 
 interface OverviewData {
   stats: {
@@ -69,127 +68,27 @@ export default function DashboardPage() {
 
   const stats = overview?.stats;
   const creditsRemaining = credits ? credits.total - credits.used : 0;
-
-  const portfolioIcons = [
-    { icon: Code, iconColor: 'text-purple-700', iconBg: 'bg-purple-50' },
-    { icon: Palette, iconColor: 'text-sky-700', iconBg: 'bg-sky-50' },
-    { icon: Bot, iconColor: 'text-green-700', iconBg: 'bg-green-50' },
-    { icon: PenLine, iconColor: 'text-amber-700', iconBg: 'bg-amber-50' },
-  ];
+  const creditsTotal = credits?.total || 0;
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      <div className={styles.loaderContainer}>
+        <Loader2 className={styles.loaderIcon} />
       </div>
     );
   }
 
   return (
-    <div className="animate-in space-y-7">
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
-        {[
-          { label: 'Portfolio views', value: stats?.totalViews?.toLocaleString() || '0', change: `${stats?.recentViews || 0} this month`, trend: 'up', icon: Eye },
-          { label: 'Resume downloads', value: stats?.totalDownloads?.toLocaleString() || '0', change: 'total downloads', trend: 'up', icon: Download },
-          { label: 'AI credits left', value: String(creditsRemaining), change: `of ${credits?.total || 0}/month`, trend: 'flat', icon: Sparkles },
-          { label: 'Portfolios', value: String(stats?.portfolioCount || 0), change: `${stats?.aiGenerations || 0} AI generations`, trend: 'up', icon: UserCheck },
-        ].map((stat) => (
-          <div
-            key={stat.label}
-            className="rounded-xl border border-gray-200/60 bg-white p-4 dark:border-gray-700/60 dark:bg-gray-900"
-          >
-            <div className="flex items-center gap-1.5 text-xs text-gray-500">
-              <stat.icon className="h-3.5 w-3.5" />
-              {stat.label}
-            </div>
-            <div className="mt-2 text-2xl font-medium text-gray-900 dark:text-white">{stat.value}</div>
-            <div className={`mt-1.5 flex items-center gap-1 text-xs ${
-              stat.trend === 'up' ? 'text-green-600' : stat.trend === 'down' ? 'text-red-600' : 'text-gray-400'
-            }`}>
-              {stat.trend === 'up' && <TrendingUp className="h-3 w-3" />}
-              {stat.change}
-            </div>
-          </div>
-        ))}
-      </div>
+    <div className={styles.container}>
+      <StatsGrid stats={stats} creditsRemaining={creditsRemaining} creditsTotal={creditsTotal} />
 
-      {/* Two Column Layout */}
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_380px]">
-        {/* Left Column */}
-        <div className="space-y-5">
-          {/* My Portfolios */}
-          <div className="rounded-xl border border-gray-200/60 bg-white p-5 dark:border-gray-700/60 dark:bg-gray-900">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-sm font-medium text-gray-900 dark:text-white">My portfolios</h3>
-              <Link href="/portfolio/new" className="text-xs text-blue-600 hover:underline font-medium">
-                + New
-              </Link>
-            </div>
-            {portfolios.length === 0 ? (
-              <div className="py-8 text-center text-sm text-gray-400">
-                <Globe className="mx-auto h-8 w-8 mb-2 text-gray-300" />
-                No portfolios yet. <Link href="/portfolio/new" className="text-blue-600 hover:underline">Create one</Link>
-              </div>
-            ) : (
-              portfolios.slice(0, 4).map((p, idx) => {
-                const iconSet = portfolioIcons[idx % portfolioIcons.length];
-                return (
-                  <Link href={`/portfolio/${p.id}/editor`} key={p.id} className="flex items-center gap-3 border-b border-gray-100 py-2.5 last:border-b-0 last:pb-0 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg px-2 -mx-2 transition-colors">
-                    <div className={`flex h-[38px] w-[38px] flex-shrink-0 items-center justify-center rounded-lg ${iconSet.iconBg}`}>
-                      <iconSet.icon className={`h-[17px] w-[17px] ${iconSet.iconColor}`} />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-[13px] font-medium text-gray-900 dark:text-white">{p.title || p.slug}</p>
-                      <p className="text-xs text-gray-400">{p.slug}.portfolioai.com</p>
-                    </div>
-                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${
-                      p.status === 'PUBLISHED' ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'
-                    }`}>{p.status === 'PUBLISHED' ? 'Live' : 'Draft'}</span>
-                    <span className="flex items-center gap-1 text-xs text-gray-400 whitespace-nowrap">
-                      {p.viewCount > 0 && <Eye className="h-3 w-3" />} {p.viewCount > 0 ? p.viewCount.toLocaleString() : '—'}
-                    </span>
-                  </Link>
-                );
-              })
-            )}
-          </div>
-
-
+      <div className={styles.layout}>
+        <div className={styles.leftColumn}>
+          <PortfolioList portfolios={portfolios} />
         </div>
 
-        {/* Right Column */}
-        <div className="space-y-5">
-          {/* AI Tools */}
-          <div className="rounded-xl border border-gray-200/60 bg-white p-5 dark:border-gray-700/60 dark:bg-gray-900">
-            <h3 className="mb-4 text-sm font-medium text-gray-900 dark:text-white">AI tools</h3>
-            <div className="space-y-2.5">
-              {[
-                { title: 'Generate bio', desc: 'Rewrite your About section', icon: UserCircle, iconBg: 'bg-purple-50', iconColor: 'text-purple-700', href: '/ai-tools' },
-                { title: 'Optimize resume', desc: 'Target a specific job role', icon: FileText, iconBg: 'bg-sky-50', iconColor: 'text-sky-700', href: '/ai-tools' },
-                { title: 'Write case study', desc: 'From your GitHub projects', icon: ClipboardList, iconBg: 'bg-green-50', iconColor: 'text-green-700', href: '/ai-tools' },
-                { title: 'Generate README', desc: 'Auto-document your repos', icon: Github, iconBg: 'bg-amber-50', iconColor: 'text-amber-700', href: '/ai-tools' },
-                { title: 'Improve LinkedIn', desc: 'Recruiter-optimized summary', icon: Linkedin, iconBg: 'bg-red-50', iconColor: 'text-red-700', href: '/ai-tools' },
-              ].map((tool) => (
-                <Link
-                  key={tool.title}
-                  href={tool.href}
-                  className="flex w-full items-center gap-3 rounded-lg border border-gray-100 bg-white p-3 text-left transition-colors hover:bg-gray-50 dark:border-gray-800 dark:bg-gray-900 dark:hover:bg-gray-800"
-                >
-                  <div className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg ${tool.iconBg}`}>
-                    <tool.icon className={`h-[17px] w-[17px] ${tool.iconColor}`} />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-[13px] font-medium text-gray-900 dark:text-white">{tool.title}</p>
-                    <p className="text-xs text-gray-400">{tool.desc}</p>
-                  </div>
-                  <ArrowRight className="h-[15px] w-[15px] text-gray-300" />
-                </Link>
-              ))}
-            </div>
-          </div>
-
-
+        <div className={styles.rightColumn}>
+          <AIToolsList />
         </div>
       </div>
     </div>

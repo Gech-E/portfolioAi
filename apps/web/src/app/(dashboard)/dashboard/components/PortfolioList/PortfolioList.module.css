@@ -1,0 +1,71 @@
+.container {
+  @apply rounded-xl border border-gray-200/60 bg-white p-5 dark:border-gray-700/60 dark:bg-gray-900;
+}
+
+.header {
+  @apply mb-4 flex items-center justify-between;
+}
+
+.heading {
+  @apply text-sm font-medium text-gray-900 dark:text-white;
+}
+
+.newLink {
+  @apply text-xs text-blue-600 hover:underline font-medium;
+}
+
+.emptyState {
+  @apply py-8 text-center text-sm text-gray-400;
+}
+
+.emptyIcon {
+  @apply mx-auto h-8 w-8 mb-2 text-gray-300;
+}
+
+.createLink {
+  @apply text-blue-600 hover:underline;
+}
+
+.listItem {
+  @apply flex items-center gap-3 border-b border-gray-100 py-2.5 last:border-b-0 last:pb-0 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg px-2 -mx-2 transition-colors;
+}
+
+.iconWrapper {
+  @apply flex h-[38px] w-[38px] flex-shrink-0 items-center justify-center rounded-lg;
+}
+
+.icon {
+  @apply h-[17px] w-[17px];
+}
+
+.infoWrapper {
+  @apply min-w-0 flex-1;
+}
+
+.title {
+  @apply truncate text-[13px] font-medium text-gray-900 dark:text-white;
+}
+
+.slug {
+  @apply text-xs text-gray-400;
+}
+
+.statusBadge {
+  @apply inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium;
+}
+
+.statusLive {
+  @apply bg-green-50 text-green-700;
+}
+
+.statusDraft {
+  @apply bg-gray-100 text-gray-600;
+}
+
+.viewCount {
+  @apply flex items-center gap-1 text-xs text-gray-400 whitespace-nowrap;
+}
+
+.eyeIcon {
+  @apply h-3 w-3;
+}
