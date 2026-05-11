@@ -9,6 +9,7 @@ import { AiModule } from './modules/ai/ai.module';
 import { ResumesModule } from './modules/resumes/resumes.module';
 import { CareerModule } from './modules/career/career.module';
 import { IntegrationsModule } from './modules/integrations/integrations.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { IntegrationsModule } from './modules/integrations/integrations.module';
     ResumesModule,
     CareerModule,
     IntegrationsModule,
+    AnalyticsModule,
   ],
 })
 export class AppModule {}

@@ -1,10 +1,10 @@
-import { Controller, Post, Body, Get, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Req, Param, Query } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { Request } from 'express';
 import { AiService } from './ai.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
-@ApiTags('AI Proxy')
+@ApiTags('AI')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('ai')
@@ -25,5 +25,33 @@ export class AiController {
     const user = (req as any).user;
     const credits = await this.aiService.getCredits(user.sub);
     return { success: true, data: credits, timestamp: new Date().toISOString() };
+  }
+
+  @Get('usage')
+  @ApiOperation({ summary: 'Get AI usage statistics' })
+  async getUsage(@Req() req: Request) {
+    const user = (req as any).user;
+    const usage = await this.aiService.getUsage(user.sub);
+    return { success: true, data: usage, timestamp: new Date().toISOString() };
+  }
+
+  @Get('history')
+  @ApiOperation({ summary: 'Get AI generation history' })
+  async getHistory(@Req() req: Request, @Query('limit') limit?: number) {
+    const user = (req as any).user;
+    const history = await this.aiService.getHistory(user.sub, limit || 20);
+    return { success: true, data: history, timestamp: new Date().toISOString() };
+  }
+
+  @Post('generations/:id/feedback')
+  @ApiOperation({ summary: 'Submit feedback on a generation' })
+  async submitFeedback(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body() body: { rating: string; note?: string },
+  ) {
+    const user = (req as any).user;
+    await this.aiService.submitFeedback(user.sub, id, body.rating, body.note);
+    return { success: true, data: null, timestamp: new Date().toISOString() };
   }
 }

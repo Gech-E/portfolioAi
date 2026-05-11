@@ -47,6 +47,34 @@ export class PortfoliosController {
     return { success: true, data: updated, timestamp: new Date().toISOString() };
   }
 
+  @Post(':id/publish')
+  @ApiOperation({ summary: 'Publish a portfolio' })
+  async publish(@Req() req: Request, @Param('id') id: string) {
+    const user = (req as any).user;
+    const published = await this.portfoliosService.publish(id, user.sub);
+    return { success: true, data: published, timestamp: new Date().toISOString() };
+  }
+
+  @Get(':id/versions')
+  @ApiOperation({ summary: 'Get portfolio version history' })
+  async getVersions(@Req() req: Request, @Param('id') id: string) {
+    const user = (req as any).user;
+    const versions = await this.portfoliosService.getVersions(id, user.sub);
+    return { success: true, data: versions, timestamp: new Date().toISOString() };
+  }
+
+  @Post(':id/restore/:versionId')
+  @ApiOperation({ summary: 'Restore portfolio to a previous version' })
+  async restoreVersion(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Param('versionId') versionId: string,
+  ) {
+    const user = (req as any).user;
+    const restored = await this.portfoliosService.restoreVersion(id, versionId, user.sub);
+    return { success: true, data: restored, timestamp: new Date().toISOString() };
+  }
+
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a portfolio' })
   async remove(@Req() req: Request, @Param('id') id: string) {
