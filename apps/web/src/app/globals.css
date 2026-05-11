@@ -146,13 +146,11 @@
   }
 }
 
-/* Utility layer */
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+/* Custom Utilities for v4 */
+@utility text-balance {
+  text-wrap: balance;
+}
 
-  .animate-in {
-    animation: fade-in 0.3s ease-out, slide-up 0.3s ease-out;
-  }
+@utility animate-in {
+  animation: fade-in 0.3s ease-out, slide-up 0.3s ease-out;
 }
