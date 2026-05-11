@@ -32,8 +32,8 @@ export default function AIToolsPage() {
         setCredits(response.data);
       }
     } catch {
-      // Use fallback
-      setCredits({ total: 50, used: 12 });
+      // User is likely unauthenticated or API failed
+      setCredits(null);
     }
   };
 

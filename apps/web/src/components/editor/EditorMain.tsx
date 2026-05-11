@@ -14,6 +14,7 @@ interface EditorMainProps {
 
 export function EditorMain({ section, data, onUpdate }: EditorMainProps) {
   const [isGenerating, setIsGenerating] = React.useState(false);
+  const [newSkill, setNewSkill] = React.useState('');
 
   const handleGenerateBio = async () => {
     setIsGenerating(true);
@@ -321,7 +322,6 @@ export function EditorMain({ section, data, onUpdate }: EditorMainProps) {
 
   const renderSkills = () => {
     const skills = data.skills || [];
-    const [newSkill, setNewSkill] = React.useState('');
 
     const addSkill = (e: React.KeyboardEvent | React.FormEvent) => {
       e.preventDefault();

@@ -155,39 +155,7 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Skill Profile */}
-          <div className="rounded-xl border border-gray-200/60 bg-white p-5 dark:border-gray-700/60 dark:bg-gray-900">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-sm font-medium text-gray-900 dark:text-white">Skill profile</h3>
-              <span className="text-xs text-gray-400">Based on GitHub + LinkedIn</span>
-            </div>
-            <div className="grid grid-cols-2 gap-x-5 gap-y-3">
-              {[
-                { skill: 'React / Next.js', level: 92 },
-                { skill: 'Python', level: 78 },
-                { skill: 'Node.js', level: 85 },
-                { skill: 'TypeScript', level: 80 },
-                { skill: 'PostgreSQL', level: 65, warn: true },
-                { skill: 'Docker / K8s', level: 55, warn: true },
-              ].map((s) => (
-                <div key={s.skill}>
-                  <div className="flex justify-between text-xs text-gray-500">
-                    <span>{s.skill}</span>
-                    <span className="font-medium text-gray-900 dark:text-white">{s.level}%</span>
-                  </div>
-                  <div className="mt-1 h-1 rounded-full bg-gray-100 dark:bg-gray-800">
-                    <div
-                      className={`h-full rounded-full transition-all duration-700 ${s.warn ? 'bg-amber-500' : 'bg-blue-600'}`}
-                      style={{ width: `${s.level}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-            <Link href="/career-roadmap" className="mt-4 block w-full rounded-lg border border-gray-200 py-2 text-center text-[13px] text-gray-500 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800">
-              Run AI skill gap analysis ↗
-            </Link>
-          </div>
+
         </div>
 
         {/* Right Column */}
@@ -221,55 +189,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* ATS Score */}
-          <div className="rounded-xl border border-gray-200/60 bg-white p-5 dark:border-gray-700/60 dark:bg-gray-900">
-            <h3 className="mb-3 text-sm font-medium text-gray-900 dark:text-white">Resume ATS score</h3>
-            <div className="flex flex-col items-center py-4">
-              <div className="relative" style={{ width: 88, height: 88 }}>
-                <svg width={88} height={88} viewBox="0 0 88 88" fill="none">
-                  <circle cx="44" cy="44" r="36" stroke="#f3f4f6" strokeWidth="8" className="dark:stroke-gray-800" />
-                  <circle cx="44" cy="44" r="36" stroke="#2563EB" strokeWidth="8" strokeDasharray="226" strokeDashoffset="59" strokeLinecap="round" transform="rotate(-90 44 44)" />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-[22px] font-medium text-gray-900 dark:text-white">74</span>
-                  <span className="text-[10px] text-gray-400">/ 100</span>
-                </div>
-              </div>
-              <p className="mt-2.5 text-center text-[13px] text-gray-500">Good — minor improvements will push you to 85+</p>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-medium text-green-700"><Check className="h-2.5 w-2.5" />Keywords matched</span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-medium text-green-700"><Check className="h-2.5 w-2.5" />Formatting</span>
-              <span className="rounded-full bg-yellow-50 px-2.5 py-1 text-[11px] font-medium text-yellow-700">Weak action verbs</span>
-              <span className="rounded-full bg-red-50 px-2.5 py-1 text-[11px] font-medium text-red-700">Missing: AWS cert</span>
-            </div>
-            <Link href="/ai-tools" className="mt-4 block w-full rounded-lg border border-gray-200 py-2 text-center text-[13px] text-gray-500 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800">
-              Auto-fix with AI ↗
-            </Link>
-          </div>
 
-          {/* Recent Activity */}
-          <div className="rounded-xl border border-gray-200/60 bg-white p-5 dark:border-gray-700/60 dark:bg-gray-900">
-            <h3 className="mb-4 text-sm font-medium text-gray-900 dark:text-white">Recent activity</h3>
-            <div className="space-y-0">
-              {[
-                { text: 'AI generated your portfolio bio', time: '2 hours ago', icon: Sparkles, iconBg: 'bg-purple-50', iconColor: 'text-purple-700' },
-                { text: 'Portfolio published', time: 'Yesterday', icon: Globe, iconBg: 'bg-green-50', iconColor: 'text-green-700' },
-                { text: 'GitHub repos imported', time: '2 days ago', icon: Github, iconBg: 'bg-sky-50', iconColor: 'text-sky-700' },
-                { text: 'Resume optimized for SE role', time: '3 days ago', icon: FileText, iconBg: 'bg-amber-50', iconColor: 'text-amber-700' },
-              ].map((item) => (
-                <div key={item.text} className="flex items-start gap-3 border-b border-gray-100 py-2.5 last:border-b-0 dark:border-gray-800">
-                  <div className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full ${item.iconBg}`}>
-                    <item.icon className={`h-3.5 w-3.5 ${item.iconColor}`} />
-                  </div>
-                  <div>
-                    <p className="text-[13px] text-gray-900 dark:text-white">{item.text}</p>
-                    <p className="text-xs text-gray-400">{item.time}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     </div>
