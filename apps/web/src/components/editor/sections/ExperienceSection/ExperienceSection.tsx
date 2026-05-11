@@ -46,7 +46,7 @@ export function ExperienceSection({ data, onUpdate }: ExperienceSectionProps) {
           </div>
         ) : (
           experiences.map((exp: any, i: number) => (
-            <Card key={i} className={styles.card}>
+            <Card key={i} className={`${styles.card} group`}>
               <div className={styles.dragHandle}>
                 <GripVertical className={styles.dragIcon} />
               </div>

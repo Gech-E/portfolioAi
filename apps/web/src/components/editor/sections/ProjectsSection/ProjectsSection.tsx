@@ -48,7 +48,7 @@ export function ProjectsSection({ data, isGenerating, onGenerateProject, onUpdat
           </div>
         ) : (
           projects.map((proj: any, i: number) => (
-            <Card key={i} className={styles.card}>
+            <Card key={i} className={`${styles.card} group`}>
               <div className={styles.dragHandle}>
                 <GripVertical className={styles.dragIcon} />
               </div>

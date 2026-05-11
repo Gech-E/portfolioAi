@@ -29,7 +29,7 @@
 }
 
 .card {
-  @apply p-4 relative group dark:bg-gray-900 border-gray-200 dark:border-gray-800;
+  @apply p-4 relative dark:bg-gray-900 border-gray-200 dark:border-gray-800;
 }
 
 .dragHandle {
