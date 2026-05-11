@@ -47,6 +47,29 @@ export default function IntegrationsPage() {
     }
   };
 
+  const handleConnect = async (provider: string) => {
+    try {
+      await api.post(`/integrations/${provider}/connect`, {
+        accessToken: `demo_token_${Date.now()}`,
+        username: `user_${provider.toLowerCase()}`
+      });
+      toast.success(`Connected to ${provider}!`);
+      fetchIntegrations();
+    } catch (error: any) {
+      toast.error(`Failed to connect ${provider}`);
+    }
+  };
+
+  const handleDisconnect = async (provider: string) => {
+    try {
+      await api.delete(`/integrations/${provider}`);
+      toast.success(`Disconnected from ${provider}`);
+      fetchIntegrations();
+    } catch (error: any) {
+      toast.error(`Failed to disconnect ${provider}`);
+    }
+  };
+
   const providers = [
     {
       id: 'GITHUB',
@@ -137,12 +160,17 @@ export default function IntegrationsPage() {
                       {syncing === p.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCcw className="h-4 w-4" />}
                       Sync Now
                     </button>
-                    <button className="p-2 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-400 hover:text-red-500 transition-colors">
-                      <ExternalLink className="h-4 w-4" />
+                    <button 
+                      onClick={() => handleDisconnect(p.id)}
+                      className="p-2 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-400 hover:text-red-500 transition-colors"
+                      title={`Disconnect ${p.name}`}
+                    >
+                      <XCircle className="h-4 w-4" />
                     </button>
                   </>
                 ) : (
                   <button
+                    onClick={() => handleConnect(p.id)}
                     className="w-full py-2.5 bg-gray-900 dark:bg-white dark:text-gray-900 text-white rounded-lg text-sm font-bold hover:opacity-90 transition-opacity"
                   >
                     Connect {p.name}
