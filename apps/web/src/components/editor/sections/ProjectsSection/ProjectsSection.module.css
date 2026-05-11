@@ -33,7 +33,7 @@
 }
 
 .dragHandle {
-  @apply absolute left-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab;
+  @apply absolute left-2 top-1/2 -translate-y-1/2 opacity-0 transition-opacity cursor-grab;
 }
 
 .dragIcon {
@@ -90,4 +90,9 @@
 
 .deleteIcon {
   @apply h-4 w-4;
+}
+
+
+.card:hover .dragHandle {
+  opacity: 1;
 }
