@@ -10,6 +10,8 @@ import { CareerService } from './career.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AiService } from '../ai/ai.service';
 import { Request } from 'express';
+import { GenerateRoadmapDto } from './dto/generate-roadmap.dto';
+import { GenerateAssessmentDto } from './dto/generate-assessment.dto';
 
 @Controller('career')
 @UseGuards(JwtAuthGuard)
@@ -29,7 +31,7 @@ export class CareerController {
   @Post('roadmaps/generate')
   async generateRoadmap(
     @Req() req: Request,
-    @Body() body: { currentRole: string; targetRole: string; timelineMonths?: number },
+    @Body() body: GenerateRoadmapDto,
   ) {
     const user = (req as any).user;
     const result = await this.aiService.generate(user.sub, 'CAREER_ROADMAP', body);
@@ -53,7 +55,7 @@ export class CareerController {
   @Post('assessments/generate')
   async generateAssessment(
     @Req() req: Request,
-    @Body() body: { targetRole: string },
+    @Body() body: GenerateAssessmentDto,
   ) {
     const user = (req as any).user;
     
