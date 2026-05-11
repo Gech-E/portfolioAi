@@ -9,7 +9,6 @@ import {
   UseGuards,
   Req,
   Res,
-  Header,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { ResumesService } from './resumes.service';
