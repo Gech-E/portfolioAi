@@ -69,6 +69,22 @@ export default function PortfolioEditorPage() {
     }));
   };
 
+  const publishMutation = useMutation({
+    mutationFn: () => api.post(`/portfolios/${id}/publish`),
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ['portfolio', id] });
+      setLocalData((prev: any) => ({ ...prev, status: 'PUBLISHED', publishedUrl: data.data?.publishedUrl }));
+      toast.success('Portfolio published successfully!');
+    },
+    onError: () => {
+      toast.error('Failed to publish portfolio');
+    }
+  });
+
+  const handlePublish = () => {
+    publishMutation.mutate();
+  };
+
   if (isLoading || !localData) {
     return (
       <div className="flex h-screen items-center justify-center bg-gray-50 dark:bg-gray-950">
@@ -122,18 +138,14 @@ export default function PortfolioEditorPage() {
             {isPreviewOpen ? <Layout className="mr-2 h-4 w-4" /> : <Eye className="mr-2 h-4 w-4" />}
             {isPreviewOpen ? 'Edit Mode' : 'Live Preview'}
           </Button>
-          
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="text-blue-600 hover:bg-blue-50 hover:text-blue-700"
-            onClick={() => toast.info('AI generation coming in the next step!')}
-          >
-            <Sparkles className="mr-2 h-4 w-4" /> AI Generate
+
+          <Button size="sm" variant="outline" onClick={handleSave} disabled={saveMutation.isPending}>
+            <Save className="mr-2 h-4 w-4" /> Save
           </Button>
 
-          <Button size="sm" onClick={handleSave} disabled={saveMutation.isPending}>
-            <Save className="mr-2 h-4 w-4" /> Save
+          <Button size="sm" onClick={handlePublish} disabled={publishMutation.isPending || localData.status === 'PUBLISHED'} className={localData.status === 'PUBLISHED' ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : ''}>
+            {publishMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {localData.status === 'PUBLISHED' ? 'Published' : 'Publish'}
           </Button>
         </div>
       </header>
