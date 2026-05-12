@@ -1,13 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import {
   LayoutDashboard, Globe, FileText, Sparkles,
   BarChart3, Route, Plug, Settings,
-  Briefcase, Search, Plus, Bell,
+  Briefcase, Search, Plus, Bell, LogOut,
 } from 'lucide-react';
 import { api } from '@/lib/api';
+import { useAuthStore } from '@/stores/auth-store';
 
 const mainNav = [
   { label: 'Workspace', items: [
@@ -27,24 +29,54 @@ const bottomNav = [
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
-import { useAuthStore } from '@/stores/auth-store';
-import { useRouter } from 'next/navigation';
-import { LogOut } from 'lucide-react';
-
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, logout } = useAuthStore();
+  const { user, isAuthenticated, logout, setLoading } = useAuthStore();
+
+  // On mount, validate that we actually have auth state.
+  // If not (e.g. localStorage was cleared or corrupted), redirect to login.
+  useEffect(() => {
+    const stored = localStorage.getItem('portfolioai-auth');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (parsed.state?.accessToken && parsed.state?.isAuthenticated) {
+          // Valid persisted session — mark loading as done
+          setLoading(false);
+          return;
+        }
+      } catch {
+        // corrupt data
+      }
+    }
+
+    // No valid session found — force redirect to login
+    logout();
+    router.replace('/login');
+  }, []);
 
   const handleLogout = async () => {
     try {
       await api.post('/auth/logout');
     } catch {
-      // ignore errors during logout
+      // ignore errors during logout — we clear client state regardless
     }
     logout();
-    router.push('/login');
+    router.replace('/login');
   };
+
+  // If no user data yet (loading or not authenticated), show minimal loading state
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-gray-50 dark:bg-gray-950">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+          <p className="text-sm text-gray-400">Loading…</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-950">

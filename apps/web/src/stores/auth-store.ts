@@ -14,6 +14,22 @@ interface AuthState {
   setLoading: (loading: boolean) => void;
 }
 
+/**
+ * Helper to set or clear the `portfolioai_session` cookie.
+ * This cookie is read by the Next.js middleware to gate protected routes.
+ * It carries no secret — it's only a flag; the real auth is the JWT.
+ */
+function setSessionCookie(active: boolean) {
+  if (typeof document === 'undefined') return;
+  if (active) {
+    // Session cookie (no max-age → deleted when browser closes) OR set 7d like the refresh token
+    document.cookie = 'portfolioai_session=1; path=/; max-age=' + 7 * 24 * 60 * 60 + '; SameSite=Lax';
+  } else {
+    // Clear cookie
+    document.cookie = 'portfolioai_session=; path=/; max-age=0; SameSite=Lax';
+  }
+}
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
@@ -23,16 +39,26 @@ export const useAuthStore = create<AuthState>()(
       isLoading: true,
       setUser: (user) => set({ user, isAuthenticated: !!user }),
       setAccessToken: (accessToken) => set({ accessToken }),
-      login: (user, accessToken) =>
-        set({ user, accessToken, isAuthenticated: true, isLoading: false }),
-      logout: () =>
-        set({ user: null, accessToken: null, isAuthenticated: false }),
+      login: (user, accessToken) => {
+        setSessionCookie(true);
+        set({ user, accessToken, isAuthenticated: true, isLoading: false });
+      },
+      logout: () => {
+        setSessionCookie(false);
+        // Also clear the persisted localStorage entry to fully sign out
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('portfolioai-auth');
+        }
+        set({ user: null, accessToken: null, isAuthenticated: false, isLoading: false });
+      },
       setLoading: (isLoading) => set({ isLoading }),
     }),
     {
       name: 'portfolioai-auth',
       partialize: (state) => ({
         accessToken: state.accessToken,
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
       }),
     },
   ),
