@@ -5,5 +5,5 @@ export class GenerateAssessmentDto {
   @ApiProperty({ example: 'Senior Full Stack Engineer' })
   @IsString()
   @IsNotEmpty()
-  targetRole: string;
+  targetRole!: string;
 }

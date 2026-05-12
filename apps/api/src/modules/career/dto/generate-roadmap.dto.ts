@@ -5,12 +5,12 @@ export class GenerateRoadmapDto {
   @ApiProperty({ example: 'Junior Frontend Developer' })
   @IsString()
   @IsNotEmpty()
-  currentRole: string;
+  currentRole!: string;
 
   @ApiProperty({ example: 'Senior Full Stack Engineer' })
   @IsString()
   @IsNotEmpty()
-  targetRole: string;
+  targetRole!: string;
 
   @ApiPropertyOptional({ example: 6, description: 'Timeline in months' })
   @IsNumber()
