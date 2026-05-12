@@ -4,8 +4,13 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
+import { validateEnv } from './config/env.config';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 async function bootstrap() {
+  // Validate environment variables first to fail fast
+  validateEnv(process.env);
+
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'warn', 'log'],
   });
@@ -35,6 +40,9 @@ async function bootstrap() {
       transformOptions: { enableImplicitConversion: true },
     }),
   );
+
+  // Global Error Filter
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   // Swagger API docs
   const config = new DocumentBuilder()
